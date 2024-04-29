@@ -1,0 +1,17 @@
+spring:
+  security:
+    saml2:
+      relyingparty:
+        registration:
+          keycloak:
+            entity-id: hedgedoc-portal
+            signing:
+              credentials:
+              - private-key-location: classpath:credentials/local.key
+                certificate-location: classpath:credentials/local.crt
+            assertingparty:
+              metadata-uri: http://localhost:8080/realms/hedgedoc/protocol/saml/descriptor
+metadata:
+    location: http://localhost:8080/realms/hedgedoc/protocol/saml/descriptor
+server:
+    port: 8081
