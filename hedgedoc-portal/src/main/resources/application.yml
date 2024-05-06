@@ -11,7 +11,3 @@ spring:
                 certificate-location: classpath:credentials/local.crt
             assertingparty:
               metadata-uri: http://localhost:8080/realms/hedgedoc/protocol/saml/descriptor
-metadata:
-    location: http://localhost:8080/realms/hedgedoc/protocol/saml/descriptor
-server:
-    port: 8081
