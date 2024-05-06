@@ -11,3 +11,6 @@
    - URL: `http://localhost:3000`
    - user: `user`
    - password: `pass`
+
+4. hedgedoc-portal起動
+   - [hedgedoc-portal/README.md](./hedgedoc-portal/README.md)を参照

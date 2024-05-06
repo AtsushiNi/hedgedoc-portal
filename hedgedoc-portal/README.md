@@ -12,7 +12,7 @@ mvn spring-boot:run
 cd src/main/frontend
 ./node/npm start
 ```
-3. localhost:3000にアクセス
+3. localhost:3001にアクセス
 
 ### 本番
 1. Spring Boot サーバー起動(自動的にReactがビルド・Spring Boot上に配置される)
@@ -20,4 +20,4 @@ cd src/main/frontend
 mvn spring-boot:run -Pprod
 ```
 
-2. localhost:8080にアクセス
+2. localhost:8081にアクセス
