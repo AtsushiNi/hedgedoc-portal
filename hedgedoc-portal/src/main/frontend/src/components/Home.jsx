@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card, Flex } from 'antd';
+import dayjs from 'dayjs';
 import axios from 'axios';
 
 export default function Home() {
@@ -30,8 +31,13 @@ export default function Home() {
         </Flex>
         <Flex wrap="wrap" >
           {notes.map(note => (
-            <Card key={note.id} title={note.text} style={{ width: "280px", height: "140px", margin: "20px" }}>
-              <p>{note.time}</p>
+            <Card
+              key={note.id}
+              title={note.text}
+              onClick={() => window.open("http://localhost:3000/" + note.id, "_blank")}
+              style={{ width: "280px", height: "140px", margin: "20px", cursor: "pointer" }}
+            >
+              <p>{dayjs(note.time).format("YYYY-MM-DD HH:mm")}</p>
             </Card>
           ))}
         </Flex>
