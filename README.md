@@ -6,6 +6,9 @@
 2. Keycloak起動
    1. `cd keycloak`
    2. `docker-compose up`
+   3. 設定
+      - ![設定1](./readme-images/keycloak-setting1.png)
+      - ![設定2](./readme-images/keycloak-setting2.png)
 
 3. Hedgedocにアクセス
    - URL: `http://localhost:3000`
