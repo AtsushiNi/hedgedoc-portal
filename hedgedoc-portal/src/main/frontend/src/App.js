@@ -2,6 +2,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 import Home from './components/Home';
 import CookieSetting from './components/CookieSetting';
+import FolderDetail from './components/FolderDetail';
 const { Header, Content } = Layout;
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/cookie-setting" element={<CookieSetting />} />
+            <Route path="/folders/:folderId" element={<FolderDetail />} />
           </Routes>
         </Content>
       </Layout>
