@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Card, Flex } from 'antd';
 import axios from 'axios';
-import '../css/Home.css';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [notes, setNotes] = useState([]);
 
   useEffect(() => {
@@ -11,8 +12,11 @@ export default function Home() {
       try {
         const response = await axios.get("/api/v1/history");
         setNotes(response.data.history);
-        console.log(response.data.history);
       } catch (error) {
+        if (error.response.status === 403) {
+          console.log("wrong cookie for HedgeDoc.");
+          navigate("/cookie-setting");
+        }
         console.error("Error fetching history: " + error);
       }
     }
@@ -26,7 +30,7 @@ export default function Home() {
         </Flex>
         <Flex wrap="wrap" >
           {notes.map(note => (
-            <Card title={note.text} style={{ width: "280px", height: "140px", margin: "20px" }}>
+            <Card key={note.id} title={note.text} style={{ width: "280px", height: "140px", margin: "20px" }}>
               <p>{note.time}</p>
             </Card>
           ))}
