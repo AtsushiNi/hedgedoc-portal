@@ -10,6 +10,7 @@
 }
 
 .container {
+  text-align: left;
   height: 100vh;
   margin: 0;
   margin-left: auto;
