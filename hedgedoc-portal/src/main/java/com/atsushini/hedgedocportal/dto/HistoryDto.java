@@ -17,7 +17,7 @@ public class HistoryDto {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    private static class HistoryItem {
+    public static class HistoryItem {
         private String id;
         private String text;
         private Timestamp time;

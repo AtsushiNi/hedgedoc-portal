@@ -87,3 +87,5 @@ HedgeDocのユーザーと1対1に対応する
 |--|--|--|
 |id|Long|PK|
 |hedgedoc_id|String|HedgeDocのノートのID(FK)|
+
+- トップページでHedgeDocから履歴を取得する際、DBに存在しなければ作成する

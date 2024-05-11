@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class FolderDto extends ItemDto {
     
+    private Long id;
     private String title;
     private String userId;
     private List<FolderDto> subFolders;

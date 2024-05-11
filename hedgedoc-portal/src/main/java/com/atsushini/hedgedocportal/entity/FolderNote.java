@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class FolderNote {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne

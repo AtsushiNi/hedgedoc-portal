@@ -19,8 +19,8 @@ export default function Home() {
     const fetchHistory = async () => {
       try {
         const response = await axios.get("/api/v1/history");
-        setNotes(response.data.history);
-        setNotes(response.data.history.slice(0, notesPageSize));
+        setNotes(response.data);
+        setShowingNotes(response.data.slice(0, notesPageSize));
         const { data: folders } = await axios.get("/api/v1/folders");
         setFolders(folders);
       } catch (error) {
@@ -122,18 +122,18 @@ export default function Home() {
       </Flex>
       <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>履歴</div>
       <Flex wrap="wrap">
-        {notes.map((note) => (
+        {showingNotes.map((note) => (
           <Card
             className="note-card"
             key={note.id}
-            title={cardHead(note.text, note.id)}
+            title={cardHead(note.title, note.id)}
             style={cardStyle}
             headStyle={cardHeaderStyle}
           >
             <p
               style={{ margin: "-15px -24px", height: "80px", paddingTop: 20 }}
               onClick={() => window.open("http://localhost:3000/" + note.id, "_blank")}
-            >{dayjs(note.time).format("YYYY-MM-DD HH:mm")}</p>
+            >{dayjs(note.updateTime).format("YYYY-MM-DD HH:mm")}</p>
           </Card>
         ))}
       </Flex>

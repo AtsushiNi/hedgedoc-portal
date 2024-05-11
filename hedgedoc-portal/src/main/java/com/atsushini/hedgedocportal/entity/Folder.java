@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class Folder {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
