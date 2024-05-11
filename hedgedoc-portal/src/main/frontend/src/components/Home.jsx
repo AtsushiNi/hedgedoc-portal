@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Divider, Flex } from "antd";
+import { Button, Card, Divider, Dropdown, Space, Flex, Modal, Cascader, Pagination } from "antd";
 import dayjs from "dayjs";
 import axios from "axios";
+import "../css/Home.css";
 
 export default function Home() {
   const navigate = useNavigate();
   const [notes, setNotes] = useState([]);
+  const [showingNotes, setShowingNotes] = useState([]);
   const [folders, setFolders] = useState([]);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+
+  const notesPageSize = 15;
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const response = await axios.get("/api/v1/history");
         setNotes(response.data.history);
+        setNotes(response.data.history.slice(0, notesPageSize));
         const { data: folders } = await axios.get("/api/v1/folders");
         setFolders(folders);
       } catch (error) {
@@ -46,6 +52,51 @@ export default function Home() {
     border: "none",
   };
 
+  const noteMenuItems = [
+    {
+      key: '1',
+      label: (
+        <Button onClick={() => setIsMoveModalOpen(true)} type="primary">move</Button>
+      )
+    },
+    {
+      key: '2',
+      danger: true,
+      label: 'delete'
+    }
+  ]
+  const cardHead = (title, id) => (
+    <div style={{display: "flex", justifyContent: "space-between"}}>
+      <div
+        onClick={() => window.open("http://localhost:3000/" + id, "_blank")}
+        style={{ lineHeight: "40px", width: "200px" }}
+      >{title}</div>
+      <Dropdown
+        menu={{ items: noteMenuItems }}
+        onClick={e => e.preventDefault()}
+        style={{ lineHeight: "40px", marginRight: "-20px" }}
+      >
+        <Space>...</Space>
+      </Dropdown>
+    </div>
+  )
+
+  const mapFolder = folders => (
+    folders.map(folder => ({
+      value: folder.id,
+      label: folder.title,
+      children: mapFolder(folder.subFolders)
+    }))
+  );
+  const folderOptions = mapFolder(folders);
+
+  const handleChangeNotesPageNumber = pageIndex => {
+    const startIndex = notesPageSize * (pageIndex - 1);
+    const endIndex = Math.min(notesPageSize * pageIndex, notes.length);
+
+    setShowingNotes(notes.slice(startIndex, endIndex))
+  }
+
   return (
     <div className="container">
       <Flex
@@ -63,18 +114,20 @@ export default function Home() {
       <Flex wrap="wrap">
         {notes.map((note) => (
           <Card
+            className="note-card"
             key={note.id}
-            title={note.text}
-            onClick={() =>
-              window.open("http://localhost:3000/" + note.id, "_blank")
-            }
+            title={cardHead(note.text, note.id)}
             style={cardStyle}
             headStyle={cardHeaderStyle}
           >
-            <p>{dayjs(note.time).format("YYYY-MM-DD HH:mm")}</p>
+            <p
+              style={{ margin: "-15px -24px", height: "80px", paddingTop: 20 }}
+              onClick={() => window.open("http://localhost:3000/" + note.id, "_blank")}
+            >{dayjs(note.time).format("YYYY-MM-DD HH:mm")}</p>
           </Card>
         ))}
       </Flex>
+      <Pagination defaultCurrent={1} total={notes.length} defaultPageSize={notesPageSize} onChange={handleChangeNotesPageNumber} />
       <Divider style={{ background: "silver" }} />
       <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>フォルダ</div>
       <Flex wrap="wrap">
@@ -88,6 +141,9 @@ export default function Home() {
           ></Card>
         ))}
       </Flex>
+      <Modal title="移動先フォルダの選択" open={isMoveModalOpen} onCancel={() => setIsMoveModalOpen(false)}>
+        <Cascader options={folderOptions} expandTrigger="hover" changeOnSelect />
+      </Modal>
     </div>
   );
 }

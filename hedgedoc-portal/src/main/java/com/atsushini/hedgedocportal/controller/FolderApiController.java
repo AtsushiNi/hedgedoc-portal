@@ -30,6 +30,7 @@ public class FolderApiController {
 
     @GetMapping
     public ResponseEntity<List<FolderDto>> getFolders(HttpServletRequest request) {
+
         HttpSession session = request.getSession(false);
         if (session == null) {
             System.out.println("no session. set cookie.");
@@ -48,13 +49,13 @@ public class FolderApiController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
-        return ResponseEntity.ok().body(folderService.getRootFoldersByHedgeDocUserId(userId));
-
+        List<FolderDto> folderTree = folderService.getFolderTree(userId);
+        return ResponseEntity.ok().body(folderTree);
     }
-
+    
     @GetMapping("/{id}")
     public FolderDto getFolderById(@PathVariable Long id) {
         return folderService.getById(id);
     }
-    
+
 }

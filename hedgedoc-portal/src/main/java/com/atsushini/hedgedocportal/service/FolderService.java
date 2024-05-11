@@ -22,10 +22,12 @@ public class FolderService {
 
     private final RestTemplate restTemplate;
 
-    public List<FolderDto> getRootFoldersByHedgeDocUserId(String id) {
-        List<Folder> folders = folderRepository.findByUserHedgedocIdAndParentFolderIsNull(id);
+    public List<FolderDto> getFolderTree(String userId) {
+        List<Folder> rootFolders = folderRepository.findByUserHedgedocIdAndParentFolderIsNull(userId);
 
-        return folders.stream().map(folder -> convertToDto(folder)).toList();
+        return rootFolders.stream()
+            .map(this::convertToDtoRecursively)
+            .toList();
     }
 
     public FolderDto getById(Long id) {
@@ -62,6 +64,17 @@ public class FolderService {
         FolderDto folderDto = new FolderDto();
         folderDto.setId(entity.getId());
         folderDto.setTitle(entity.getTitle());
+
+        return folderDto;
+    }
+
+    private FolderDto convertToDtoRecursively(Folder entity) {
+        FolderDto folderDto = convertToDto(entity);
+        List<FolderDto> subFolderDtos = entity.getSubFolders()
+            .stream()
+            .map(this::convertToDtoRecursively)
+            .toList();
+        folderDto.setSubFolders(subFolderDtos);
 
         return folderDto;
     }
