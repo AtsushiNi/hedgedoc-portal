@@ -11,28 +11,52 @@ export default function Home() {
   const [showingNotes, setShowingNotes] = useState([]);
   const [folders, setFolders] = useState([]);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
-  const [moveTargetId, setMoveTargetId] = useState(null);
+  const [moveItemId, setMoveItemId] = useState(null);
+  const [moveToFolderId, setMovetoFolderId] = useState(null);
 
   const notesPageSize = 15;
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const response = await axios.get("/api/v1/history");
-        setNotes(response.data);
-        setShowingNotes(response.data.slice(0, notesPageSize));
-        const { data: folders } = await axios.get("/api/v1/folders");
-        setFolders(folders);
-      } catch (error) {
-        if (error.response.status === 403) {
-          console.log("wrong cookie for HedgeDoc.");
-          navigate("/cookie-setting");
-        }
-        console.error("Error fetching history: " + error);
-      }
-    };
     fetchHistory();
   }, []);
+
+  const fetchHistory = async () => {
+    try {
+      const response = await axios.get("/api/v1/history");
+      setNotes(response.data);
+      setShowingNotes(response.data.slice(0, notesPageSize));
+      const { data: folders } = await axios.get("/api/v1/folders");
+      setFolders(folders);
+    } catch (error) {
+      if (error.response.status === 403) {
+        console.log("wrong cookie for HedgeDoc.");
+        navigate("/cookie-setting");
+      }
+      console.error("Error fetching history: " + error);
+    }
+  };
+
+  const handleChangeMoveToFolder = list => {
+    if (list.length === 0) {
+      setMovetoFolderId(null);
+      return;
+    }
+
+    const selectedFolderId = list[list.length - 1];
+    setMovetoFolderId(selectedFolderId);
+  }
+
+  const handleMoveItem = async() => {
+    if (moveToFolderId === null) return;
+
+    const data = { noteId: moveItemId, fromFolderId: null, toFolderId: moveToFolderId };
+
+    await axios.post("/api/v1/notes/move", data);
+
+    await fetchHistory();
+
+    setIsMoveModalOpen(false);
+  }
 
   const cardStyle = {
     width: 280,
@@ -60,7 +84,7 @@ export default function Home() {
         <Button
           onClick={() => {
             setIsMoveModalOpen(true)
-            setMoveTargetId(id)
+            setMoveItemId(id)
           }}
           type="primary"
         >
@@ -151,12 +175,12 @@ export default function Home() {
           ></Card>
         ))}
       </Flex>
-      <Modal title="移動先フォルダの選択" open={isMoveModalOpen} onCancel={() => setIsMoveModalOpen(false)}>
+      <Modal title="移動先フォルダの選択" open={isMoveModalOpen} onCancel={() => setIsMoveModalOpen(false)} onOk={handleMoveItem}>
         <Cascader
           options={folderOptions}
           expandTrigger="hover"
           changeOnSelect
-          onChange={value => {console.log("target: "+moveTargetId + ", to: " + value)}}
+          onChange={handleChangeMoveToFolder}
         />
       </Modal>
     </div>

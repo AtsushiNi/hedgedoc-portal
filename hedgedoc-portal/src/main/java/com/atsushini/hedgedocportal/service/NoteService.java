@@ -1,7 +1,7 @@
 package com.atsushini.hedgedocportal.service;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,9 +12,14 @@ import org.springframework.web.client.RestTemplate;
 
 import com.atsushini.hedgedocportal.dto.HistoryDto;
 import com.atsushini.hedgedocportal.dto.NoteDto;
+import com.atsushini.hedgedocportal.entity.Folder;
+import com.atsushini.hedgedocportal.entity.FolderNote;
 import com.atsushini.hedgedocportal.entity.Note;
 import com.atsushini.hedgedocportal.exception.HedgedocApiException;
 import com.atsushini.hedgedocportal.exception.HedgedocForbiddenException;
+import com.atsushini.hedgedocportal.exception.NotFoundException;
+import com.atsushini.hedgedocportal.repository.FolderNoteRepository;
+import com.atsushini.hedgedocportal.repository.FolderRepository;
 import com.atsushini.hedgedocportal.repository.NoteRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -23,7 +28,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NoteService {
     
+    private final FolderRepository folderRepository;
     private final NoteRepository noteRepository;
+    private final FolderNoteRepository folderNoteRepository;
     private final RestTemplate restTemplate;
 
     public List<NoteDto> getHistory(String cookie) {
@@ -57,6 +64,31 @@ public class NoteService {
         List<NoteDto> noteDtos = historyDto.getHistory().stream().map(this::convertToNoteDto).toList();
         System.out.println(noteDtos);
         return noteDtos;
+    }
+
+    public void moveNote(Long noteId, Long fromFolderId, Long toFolderId) {
+        // 移動対象のノート
+        Note note;
+
+        if (fromFolderId == null) { // noteがフォルダ分けされていなかった場合
+            Optional<Note> optionalNote = noteRepository.findById(noteId); 
+            note = optionalNote.orElseThrow(() -> new NotFoundException("Note not found with ID: " + noteId));
+        } else {
+            FolderNote fromFolderNote = folderNoteRepository.findByFolderIdAndNoteId(fromFolderId, noteId);
+            if (fromFolderNote == null) {
+                throw new NotFoundException("Note not found with ID: " + noteId + " in folder with ID: " + fromFolderId);
+            }
+            note = fromFolderNote.getNote();
+        }
+
+        Optional<Folder> optionalToFolder = folderRepository.findById(toFolderId);
+        Folder toFolder = optionalToFolder.orElseThrow(() -> new NotFoundException("Folder not found with ID: " + toFolderId));
+
+        FolderNote toFolderNote = new FolderNote();
+        toFolderNote.setFolder(toFolder);
+        toFolderNote.setNote(note);
+
+        folderNoteRepository.save(toFolderNote);
     }
 
     // HedgeDocの履歴情報と、DBのNoteエンティティをマージし、Dtoに変換する
