@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 import com.atsushini.hedgedocportal.dto.FolderDto;
 import com.atsushini.hedgedocportal.dto.NoteDto;
 import com.atsushini.hedgedocportal.entity.Folder;
+import com.atsushini.hedgedocportal.entity.Note;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,8 @@ public class FolderService {
         folderDto.setSubFolders(subFolders);
 
         // HedgeDocノート
-        List<NoteDto> notes = folder.getNotes().stream().map(note -> {
+        List<NoteDto> notes = folder.getFolderNotes().stream().map(folderNote -> {
+            Note note = folderNote.getNote();
             String url = "http://localhost:3000/" + note.getHedgedocId() + "/info";
             ResponseEntity<NoteDto> response = restTemplate.getForEntity(url, NoteDto.class);
             System.out.println(response.getBody());

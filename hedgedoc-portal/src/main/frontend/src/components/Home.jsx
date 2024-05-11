@@ -11,6 +11,7 @@ export default function Home() {
   const [showingNotes, setShowingNotes] = useState([]);
   const [folders, setFolders] = useState([]);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [moveTargetId, setMoveTargetId] = useState(null);
 
   const notesPageSize = 15;
 
@@ -52,11 +53,19 @@ export default function Home() {
     border: "none",
   };
 
-  const noteMenuItems = [
+  const noteMenuItems = id => [
     {
       key: '1',
       label: (
-        <Button onClick={() => setIsMoveModalOpen(true)} type="primary">move</Button>
+        <Button
+          onClick={() => {
+            setIsMoveModalOpen(true)
+            setMoveTargetId(id)
+          }}
+          type="primary"
+        >
+          move
+        </Button>
       )
     },
     {
@@ -65,6 +74,7 @@ export default function Home() {
       label: 'delete'
     }
   ]
+
   const cardHead = (title, id) => (
     <div style={{display: "flex", justifyContent: "space-between"}}>
       <div
@@ -72,7 +82,7 @@ export default function Home() {
         style={{ lineHeight: "40px", width: "200px" }}
       >{title}</div>
       <Dropdown
-        menu={{ items: noteMenuItems }}
+        menu={{ items: noteMenuItems(id) }}
         onClick={e => e.preventDefault()}
         style={{ lineHeight: "40px", marginRight: "-20px" }}
       >
@@ -142,7 +152,12 @@ export default function Home() {
         ))}
       </Flex>
       <Modal title="移動先フォルダの選択" open={isMoveModalOpen} onCancel={() => setIsMoveModalOpen(false)}>
-        <Cascader options={folderOptions} expandTrigger="hover" changeOnSelect />
+        <Cascader
+          options={folderOptions}
+          expandTrigger="hover"
+          changeOnSelect
+          onChange={value => {console.log("target: "+moveTargetId + ", to: " + value)}}
+        />
       </Modal>
     </div>
   );

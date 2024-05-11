@@ -18,7 +18,7 @@ export default function CookieSetting() {
   return (
     <div className="container" style={{ textAlign: "left" }}>
       <Card id="cookie-card" title="set cookie" style={{ margin: "auto", width: "70%" }}>
-        <Input.TextArea rows={4} value={cookie} onChange={e => setCookie(e.target.value)}></Input.TextArea>
+        <Input.TextArea rows={4} value={cookie} onChange={e => setCookie(e.target.value)} autoFocus ></Input.TextArea>
         <Flex justify="flex-end" style={{ marginTop: "10px" }}>
           <Button type="primary" onClick={handleSubmitClick}>送信</Button>
         </Flex>

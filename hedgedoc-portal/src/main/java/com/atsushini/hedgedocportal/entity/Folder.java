@@ -34,6 +34,6 @@ public class Folder {
     @OneToMany(mappedBy = "parentFolder")
     private List<Folder> subFolders;
 
-    @OneToMany(mappedBy = "parentFolder")
-    private List<Note> notes;
+    @OneToMany(mappedBy = "folder")
+    private List<FolderNote> folderNotes;
 }
