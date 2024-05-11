@@ -1,8 +1,9 @@
 import { Routes, Route, Link } from 'react-router-dom';
-import { Layout, Menu } from 'antd';
+import { ConfigProvider, theme, Layout, Menu } from 'antd';
 import Home from './components/Home';
 import CookieSetting from './components/CookieSetting';
 import FolderDetail from './components/FolderDetail';
+const { darkAlgorithm } = theme;
 const { Header, Content } = Layout;
 
 function App() {
@@ -38,26 +39,28 @@ function App() {
 
   return (
     <div className="App">
-      <Layout>
-        <Header style={headerStyle}>
-          <div>
-            <a href="/" style={{ textDecoration: "none", color: "white" }}>HedgeDoc portal</a>
-          </div>
-          <Menu
-            theme="dark"
-            mode="horizontal"
-            items={menuItems}
-            style={{ fontSize: "large" }}
-          />
-        </Header>
-        <Content style={contentStyle}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/cookie-setting" element={<CookieSetting />} />
-            <Route path="/folders/:folderId" element={<FolderDetail />} />
-          </Routes>
-        </Content>
-      </Layout>
+      <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
+        <Layout>
+          <Header style={headerStyle}>
+            <div>
+              <a href="/" style={{ textDecoration: "none", color: "silver" }}>HedgeDoc portal</a>
+            </div>
+            <Menu
+              theme="dark"
+              mode="horizontal"
+              items={menuItems}
+              style={{ fontSize: "large" }}
+            />
+          </Header>
+          <Content style={contentStyle}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/cookie-setting" element={<CookieSetting />} />
+              <Route path="/folders/:folderId" element={<FolderDetail />} />
+            </Routes>
+          </Content>
+        </Layout>
+      </ConfigProvider>
     </div>
   );
 }

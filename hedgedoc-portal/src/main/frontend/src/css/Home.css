@@ -2,3 +2,7 @@
   height: 80px;
   padding-top: 15px;
 }
+
+.ant-dropdown .ant-dropdown-menu .ant-dropdown-menu-item:hover {
+  background-color: #1668dc;
+}

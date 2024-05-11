@@ -1,5 +1,6 @@
 package com.atsushini.hedgedocportal.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,6 +47,12 @@ public class FolderService {
         }).toList();
         folderDto.setSubFolders(subFolders);
 
+        // パンクズリスト用の親フォルダリスト
+        List<FolderDto> parentFolders = new ArrayList<>();
+        parentFolders.add(folderDto.copy());
+        parentFolders = getParentFolderTree(parentFolders);
+        folderDto.setParentFolders(parentFolders);
+
         // HedgeDocノート
         List<NoteDto> notes = folder.getFolderNotes().stream().map(folderNote -> {
             Note note = folderNote.getNote();
@@ -79,5 +86,20 @@ public class FolderService {
         folderDto.setSubFolders(subFolderDtos);
 
         return folderDto;
+    }
+
+    // 再起的に親フォルダを検索する
+    private List<FolderDto> getParentFolderTree(List<FolderDto> tree) {
+        Folder folder = folderRepository.findById(tree.get(0).getId()).get();
+        if (folder.getParentFolder() != null) {
+            FolderDto parentFolderDto = new FolderDto();
+            parentFolderDto.setId(folder.getParentFolder().getId());
+            parentFolderDto.setTitle(folder.getParentFolder().getTitle());
+
+            tree.add(0, parentFolderDto);
+
+            tree = getParentFolderTree(tree);
+        }
+        return tree;
     }
 }

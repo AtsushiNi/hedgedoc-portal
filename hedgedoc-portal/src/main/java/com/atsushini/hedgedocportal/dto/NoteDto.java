@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class NoteDto extends ItemDto {
+public class NoteDto {
     
+    private Long id;
     private String hedgedocId;
     private String title;
     private LocalDateTime updatetime;

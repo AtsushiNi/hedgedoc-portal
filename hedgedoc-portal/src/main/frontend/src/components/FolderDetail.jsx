@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Flex, Card, Divider } from 'antd';
+import { Flex, Card, Divider, Breadcrumb, Dropdown, Space } from 'antd';
 import dayjs from 'dayjs';
 import axios from 'axios';
 
 export default function FolderDetail() {
   const { folderId } = useParams();
   const navigate = useNavigate();
+  const [parentFolders, setParentFolders] = useState([]);
   const [subFolders, setSubFolders] = useState([]);
   const [notes, setNotes] = useState([]);
 
@@ -14,8 +15,10 @@ export default function FolderDetail() {
     const fetchFolder = async() => {
       try {
         const response = await axios.get("/api/v1/folders/" + folderId);
-        setSubFolders(response.data.subFolders);
-        setNotes(response.data.notes);
+        const folder = response.data;
+        setParentFolders(folder.parentFolders);
+        setSubFolders(folder.subFolders);
+        setNotes(folder.notes);
       } catch (error) {
         if (error.status === 403) {
           console.log("wrong cookie for HedgeDoc.");
@@ -25,13 +28,15 @@ export default function FolderDetail() {
       }
     };
     fetchFolder();
-  }, [])
+  }, [folderId])
 
   const cardStyle = {
     width: 280,
     height: 120,
     margin: 10,
     cursor: "pointer",
+    background: "white",
+    color: "#777",
     title: {
       height: 40
     }
@@ -39,6 +44,7 @@ export default function FolderDetail() {
   const cardHeaderStyle = {
     minHeight: 40,
     textAlign: "left",
+    color: "black",
   }
   const folderCardStyle = {
     ...cardStyle,
@@ -46,18 +52,65 @@ export default function FolderDetail() {
     border: "none",
   };
 
+  const noteMenuItems = id => [
+    {
+      key: '1',
+      label: (
+        <div
+          onClick={() => {
+            // setIsMoveModalOpen(true)
+            // setMoveItemId(id)
+          }}
+        >
+          move
+        </div>
+      ),
+    },
+    {
+      key: '2',
+      danger: true,
+      label: 'delete'
+    }
+  ]
+
+  const cardHead = (title, id) => (
+    <div style={{display: "flex", justifyContent: "space-between"}}>
+      <div
+        onClick={() => window.open("http://localhost:3000/" + id, "_blank")}
+        style={{ lineHeight: "40px", width: "200px" }}
+      >{title}</div>
+      <Dropdown
+        menu={{ items: noteMenuItems(id) }}
+        onClick={e => e.preventDefault()}
+        style={{ lineHeight: "40px", marginRight: "-20px" }}
+      >
+        <Space>...</Space>
+      </Dropdown>
+    </div>
+  )
+
   return (
     <div className="container">
+      <Breadcrumb style={{ cursor: "pointer" }}>
+        {parentFolders.map(folder => (
+          <Breadcrumb.Item onClick={() => navigate("/folders/" + folder.id)}>
+            {folder.title}
+          </Breadcrumb.Item>
+        ))}
+      </Breadcrumb>
       <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>ノート</div>
       <Flex wrap="wrap">
         {notes.map(note => (
           <Card
             key={note.id}
-            title={note.title}
+            title={cardHead(note.title, note.hedgedocId)}
             style={cardStyle}
             headStyle={cardHeaderStyle}
           >
-            <p>update at: {dayjs(note.updatetime).format("YYYY/MM/DD HH:mm")}</p>
+            <p
+              style={{ margin: "-25px -24px", height: "80px", paddingTop: 20 }}
+              onClick={() => window.open("http://localhost:3000/" + note.hedgedocId, "_blank")}
+            >update at: {dayjs(note.updatetime).format("YYYY/MM/DD HH:mm")}</p>
           </Card>
         ))}
       </Flex>
@@ -68,6 +121,7 @@ export default function FolderDetail() {
             <Card
               key={subFolder.id}
               title={subFolder.title}
+              onClick={() => navigate("/folders/" + subFolder.id)}
               style={folderCardStyle}
               headStyle={cardHeaderStyle}
             ></Card>

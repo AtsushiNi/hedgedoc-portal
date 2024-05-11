@@ -63,13 +63,16 @@ export default function Home() {
     height: 120,
     margin: 10,
     cursor: "pointer",
+    background: "white",
+    color: "#777",
     title: {
-      height: 40
+      height: 40,
     }
   };
   const cardHeaderStyle = {
     minHeight: 40,
     textAlign: "left",
+    color: "black",
   }
   const folderCardStyle = {
     ...cardStyle,
@@ -81,16 +84,15 @@ export default function Home() {
     {
       key: '1',
       label: (
-        <Button
+        <div
           onClick={() => {
             setIsMoveModalOpen(true)
             setMoveItemId(id)
           }}
-          type="primary"
         >
           move
-        </Button>
-      )
+        </div>
+      ),
     },
     {
       key: '2',
@@ -150,13 +152,13 @@ export default function Home() {
           <Card
             className="note-card"
             key={note.id}
-            title={cardHead(note.title, note.id)}
+            title={cardHead(note.title, note.hedgedocId)}
             style={cardStyle}
             headStyle={cardHeaderStyle}
           >
             <p
               style={{ margin: "-15px -24px", height: "80px", paddingTop: 20 }}
-              onClick={() => window.open("http://localhost:3000/" + note.id, "_blank")}
+              onClick={() => window.open("http://localhost:3000/" + note.hedgedocId, "_blank")}
             >{dayjs(note.updateTime).format("YYYY-MM-DD HH:mm")}</p>
           </Card>
         ))}
