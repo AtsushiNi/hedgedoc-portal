@@ -4,10 +4,12 @@ import dayjs from 'dayjs';
 import axios from "axios";
 
 const NoteList = props => {
-  const { notes, folder, folders, reload } = props
+  const { notes, folder, folders, reload, root: isRoot } = props
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [moveItemId, setMoveItemId] = useState(null);
   const [moveToFolderId, setMovetoFolderId] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteNoteId, setDeleteNoteId] = useState(null);
 
   const HEDGEDOC_URL = "http://localhost:3000";
 
@@ -42,6 +44,14 @@ const NoteList = props => {
     await reload();
   }
 
+  // 閲覧履歴からノートを削除したときのハンドラ
+  const handleDeleteNoteFromHistory = async() => {
+    await axios.delete("/api/v1/notes/" + deleteNoteId);
+
+    await reload();
+    setIsDeleteModalOpen(false);
+  }
+
   // 再帰的にフォルダ移動先選択のオプションを生成する
   const mapFolder = folders => (
     folders.map(folder => ({
@@ -70,38 +80,47 @@ const NoteList = props => {
     color: "black",
   }
 
-  const noteMenuItems = id => [
-    {
-      key: '1',
-      label: (
-        <div
-          onClick={() => {
-            setIsMoveModalOpen(true)
-            setMoveItemId(id)
-          }}
-        >
-          move
-        </div>
-      ),
-    },
-    {
-      key: '2',
-      label: (
-        <div
-          onClick={() => {
-            handleDeleteNoteFromFolder(id)
-          }}
-        >
-          delete from folder
-        </div>
-      ),
-    },
-    {
-      key: '3',
-      danger: true,
-      label: 'delete from folder'
-    },
-  ]
+  const noteMenuItems = id => {
+    const items = [
+      {
+        key: '1',
+        label: (
+          <div
+            onClick={() => {
+              setIsMoveModalOpen(true)
+              setMoveItemId(id)
+            }}
+          >
+            move
+          </div>
+        ),
+      },
+      {
+        key: '3',
+        danger: true,
+        label: (
+          <div onClick={() => {
+            setIsDeleteModalOpen(true)
+            setDeleteNoteId(id)
+          }} >
+            delete from history
+          </div>
+        ),
+      },
+    ]
+    // フォルダ内のノートリストなら、そのフォルダから削除するボタンを表示する
+    if (!isRoot) { 
+      items.splice(1, 0, {
+        key: '2',
+        label: (
+          <div onClick={() => handleDeleteNoteFromFolder(id)} >
+            delete from folder
+          </div>
+        ),
+      });
+    }
+    return items;
+  }
 
   const cardHead = note => (
     <div style={{display: "flex", justifyContent: "space-between"}}>
@@ -143,6 +162,11 @@ const NoteList = props => {
           changeOnSelect
           onChange={handleChangeMoveToFolder}
         />
+      </Modal>
+      <Modal title="ノートの削除" open={isDeleteModalOpen} onCancel={() => setIsDeleteModalOpen(false)} onOk={handleDeleteNoteFromHistory}>
+        <p>本当にノートを削除しますか？</p>
+        <p>削除した場合、全てのフォルダからHedgeDocノートへのリンクが削除されます</p>
+        <p>HedgeDocの閲覧履歴からも対象ノートへのリンクが削除されます</p>
       </Modal>
     </>
   )

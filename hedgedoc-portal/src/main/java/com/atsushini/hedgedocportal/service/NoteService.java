@@ -121,6 +121,27 @@ public class NoteService {
         folderNoteRepository.save(toFolderNote);
     }
 
+    public void deleteNote(Long noteId, Long userId, String cookie) {
+        // 対象ユーザーの全フォルダから対象ノートを削除
+        List<FolderNote> folderNotes = folderNoteRepository.findByNoteIdAndUserId(noteId, userId);
+        folderNoteRepository.deleteAll(folderNotes);
+
+        Note note = noteRepository.findById(noteId).orElse(null);
+        if (note == null) {
+            throw new NotFoundException("note not found. id: " + noteId);
+        }
+        String apiUrl = hedgedocUrl + "/history/" + note.getHedgedocId();
+
+        // HedgeDocの閲覧履歴からノートを削除
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", cookie);
+        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.DELETE, new HttpEntity<String>(headers), String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("failed to delete HedgeDoc history. id: " + note.getHedgedocId());
+        }
+    }
+
     // HedgeDocの履歴情報とDBのNoteエンティティをDtoに変換
     private NoteDto convertToNoteDto(Note note, HistoryDto.HistoryItem historyItem) {
         NoteDto noteDto = new NoteDto();

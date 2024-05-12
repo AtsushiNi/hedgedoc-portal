@@ -68,8 +68,8 @@ export default function Home() {
         </Button>
       </Flex>
 
-      <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>履歴</div>
-      <NoteList notes={showingNotes} folder={null} folders={folders} reload={fetchHistory} />
+      <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>未分類ノート</div>
+      <NoteList notes={showingNotes} folder={null} folders={folders} reload={fetchHistory} root />
       <Pagination defaultCurrent={1} total={notes.length} defaultPageSize={notesPageSize} onChange={handleChangeNotesPageNumber} />
 
       <Divider style={{ background: "silver" }} />
