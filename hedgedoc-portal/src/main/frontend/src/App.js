@@ -1,8 +1,8 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import { ConfigProvider, theme, Layout, Menu } from 'antd';
-import Home from './components/Home';
-import CookieSetting from './components/CookieSetting';
-import FolderDetail from './components/FolderDetail';
+import Home from './pages/Home';
+import CookieSetting from './pages/CookieSetting';
+import FolderDetail from './pages/FolderDetail';
 const { darkAlgorithm } = theme;
 const { Header, Content } = Layout;
 

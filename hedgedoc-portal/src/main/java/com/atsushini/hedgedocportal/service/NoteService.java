@@ -95,12 +95,13 @@ public class NoteService {
     public void moveNote(Long noteId, Long fromFolderId, Long toFolderId) {
         // 移動対象のノート
         Note note;
+        FolderNote fromFolderNote = null;
 
         if (fromFolderId == null) { // noteがフォルダ分けされていなかった場合
             Optional<Note> optionalNote = noteRepository.findById(noteId); 
             note = optionalNote.orElseThrow(() -> new NotFoundException("Note not found with ID: " + noteId));
         } else {
-            FolderNote fromFolderNote = folderNoteRepository.findByFolderIdAndNoteId(fromFolderId, noteId);
+            fromFolderNote = folderNoteRepository.findByFolderIdAndNoteId(fromFolderId, noteId);
             if (fromFolderNote == null) {
                 throw new NotFoundException("Note not found with ID: " + noteId + " in folder with ID: " + fromFolderId);
             }
@@ -114,6 +115,9 @@ public class NoteService {
         toFolderNote.setFolder(toFolder);
         toFolderNote.setNote(note);
 
+        if (fromFolderNote != null) {
+            folderNoteRepository.delete(fromFolderNote);
+        }
         folderNoteRepository.save(toFolderNote);
     }
 
