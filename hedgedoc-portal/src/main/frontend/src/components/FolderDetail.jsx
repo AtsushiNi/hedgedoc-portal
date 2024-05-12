@@ -11,6 +11,8 @@ export default function FolderDetail() {
   const [subFolders, setSubFolders] = useState([]);
   const [notes, setNotes] = useState([]);
 
+  const HEDGEDOC_URL = "http://localhost:3000";
+
   useEffect(() => {
     const fetchFolder = async() => {
       try {
@@ -76,7 +78,7 @@ export default function FolderDetail() {
   const cardHead = note => (
     <div style={{display: "flex", justifyContent: "space-between"}}>
       <div
-        onClick={() => window.open("http://localhost:3000/" + note.hedgedocId, "_blank")}
+        onClick={() => window.open(HEDGEDOC_URL + "/" + note.hedgedocId, "_blank")}
         style={{ lineHeight: "40px", width: "200px" }}
       >{note.title}</div>
       <Dropdown
@@ -109,7 +111,7 @@ export default function FolderDetail() {
           >
             <p
               style={{ margin: "-25px -24px", height: "80px", paddingTop: 20 }}
-              onClick={() => window.open("http://localhost:3000/" + note.hedgedocId, "_blank")}
+              onClick={() => window.open(HEDGEDOC_URL + "/" + note.hedgedocId, "_blank")}
             >update at: {dayjs(note.updatetime).format("YYYY/MM/DD HH:mm")}</p>
           </Card>
         ))}

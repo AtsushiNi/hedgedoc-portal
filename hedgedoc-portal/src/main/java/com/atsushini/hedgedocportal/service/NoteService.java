@@ -3,6 +3,7 @@ package com.atsushini.hedgedocportal.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,11 +35,14 @@ public class NoteService {
     private final FolderNoteRepository folderNoteRepository;
     private final RestTemplate restTemplate;
 
+    @Value("${hedgedoc.url}")
+    private String hedgedocUrl;
+
     public List<NoteDto> getHistory(CurrentUserDto currentUserDto) {
 
         HistoryDto historyDto;
         try {
-            String apiUrl = "http://localhost:3000/history";
+            String apiUrl = hedgedocUrl + "/history";
 
             // HedgeDocのCookieをセット
             HttpHeaders headers = new HttpHeaders();

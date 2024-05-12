@@ -1,5 +1,6 @@
 package com.atsushini.hedgedocportal.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,9 +20,12 @@ public class UserService {
 
     public final RestTemplate restTemplate;
     public final UserRepository userRepository;
-    
+
+    @Value("${hedgedoc.url}")
+    private String hedgedocUrl;
+
     public CurrentUserDto getUserByCookie(String cookie) {
-        String apiUrl = "http://localhost:3000/me";
+        String apiUrl = hedgedocUrl + "/me";
 
         // HedgeDocからアカウント情報を取得
         HttpHeaders headers = new HttpHeaders();

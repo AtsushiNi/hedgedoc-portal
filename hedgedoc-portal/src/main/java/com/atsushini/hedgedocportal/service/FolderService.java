@@ -4,13 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.atsushini.hedgedocportal.dto.CurrentUserDto;
 import com.atsushini.hedgedocportal.dto.FolderDto;
 import com.atsushini.hedgedocportal.dto.NoteDto;
-import com.atsushini.hedgedocportal.dto.CurrentUserDto;
 import com.atsushini.hedgedocportal.entity.Folder;
 import com.atsushini.hedgedocportal.entity.Note;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
@@ -24,6 +25,9 @@ public class FolderService {
     private final FolderRepository folderRepository;
 
     private final RestTemplate restTemplate;
+
+    @Value("${hedgedoc.url}")
+    private String hedgedocUrl;
 
     public List<FolderDto> getFolderTree(CurrentUserDto userDto) {
         List<Folder> rootFolders = folderRepository.findByUserHedgedocIdAndParentFolderIsNull(userDto.getHedgedocId());
@@ -57,7 +61,7 @@ public class FolderService {
         // HedgeDocノート
         List<NoteDto> notes = folder.getFolderNotes().stream().map(folderNote -> {
             Note note = folderNote.getNote();
-            String url = "http://localhost:3000/" + note.getHedgedocId() + "/info";
+            String url = hedgedocUrl + "/" + note.getHedgedocId() + "/info";
             ResponseEntity<NoteDto> response = restTemplate.getForEntity(url, NoteDto.class);
             System.out.println(response.getBody());
             NoteDto dto = response.getBody();

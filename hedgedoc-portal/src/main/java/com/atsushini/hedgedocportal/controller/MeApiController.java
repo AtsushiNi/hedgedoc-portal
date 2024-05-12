@@ -1,5 +1,6 @@
 package com.atsushini.hedgedocportal.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -23,6 +24,9 @@ public class MeApiController {
 
     private final RestTemplate restTemplate;
 
+    @Value("${hedgedoc.url}")
+    private String hedgedocUrl;
+
     @GetMapping
     public ResponseEntity<String> getMe(HttpServletRequest request) {
 
@@ -33,7 +37,7 @@ public class MeApiController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
 
-        String apiUrl = "http://localhost:3000/me";
+        String apiUrl = hedgedocUrl + "/me";
 
         // HedgeDocのCookieをセット
         HttpHeaders headers = new HttpHeaders();

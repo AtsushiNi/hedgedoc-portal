@@ -14,6 +14,7 @@ export default function Home() {
   const [moveItemId, setMoveItemId] = useState(null);
   const [moveToFolderId, setMovetoFolderId] = useState(null);
 
+  const HEDGEDOC_URL = "http://localhost:3000";
   const notesPageSize = 15;
 
   useEffect(() => {
@@ -104,7 +105,7 @@ export default function Home() {
   const cardHead = note => (
     <div style={{display: "flex", justifyContent: "space-between"}}>
       <div
-        onClick={() => window.open("http://localhost:3000/" + note.hedgedocId, "_blank")}
+        onClick={() => window.open(HEDGEDOC_URL + "/" + note.hedgedocId, "_blank")}
         style={{ lineHeight: "40px", width: "200px" }}
       >{note.title}</div>
       <Dropdown
@@ -141,7 +142,7 @@ export default function Home() {
       >
         <Button
           type="primary"
-          onClick={() => window.open("http://localhost:3000/new")}
+          onClick={() => window.open(HEDGEDOC_URL + "/new")}
         >
           +新規ノート
         </Button>
@@ -158,7 +159,7 @@ export default function Home() {
           >
             <p
               style={{ margin: "-15px -24px", height: "80px", paddingTop: 20 }}
-              onClick={() => window.open("http://localhost:3000/" + note.hedgedocId, "_blank")}
+              onClick={() => window.open(HEDGEDOC_URL + "/" + note.hedgedocId, "_blank")}
             >{dayjs(note.updateTime).format("YYYY-MM-DD HH:mm")}</p>
           </Card>
         ))}
