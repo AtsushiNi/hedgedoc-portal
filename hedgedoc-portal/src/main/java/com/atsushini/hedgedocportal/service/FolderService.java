@@ -13,7 +13,10 @@ import com.atsushini.hedgedocportal.dto.CurrentUserDto;
 import com.atsushini.hedgedocportal.dto.FolderDto;
 import com.atsushini.hedgedocportal.dto.NoteDto;
 import com.atsushini.hedgedocportal.entity.Folder;
+import com.atsushini.hedgedocportal.entity.FolderNote;
 import com.atsushini.hedgedocportal.entity.Note;
+import com.atsushini.hedgedocportal.exception.NotFoundException;
+import com.atsushini.hedgedocportal.repository.FolderNoteRepository;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FolderService {
     
+    private final FolderNoteRepository folderNoteRepository;
     private final FolderRepository folderRepository;
 
     private final RestTemplate restTemplate;
@@ -72,6 +76,25 @@ public class FolderService {
         folderDto.setNotes(notes);
 
         return folderDto;
+    }
+
+    // フォルダーの所有ユーザーIDを返す
+    public Long getOwnerId(Long folderId) {
+        Folder folder = folderRepository.findById(folderId).orElse(null);
+        if (folder == null) {
+            throw new NotFoundException("folder not found. id: " + folderId);
+        }
+        
+        return folder.getUser().getId();
+    }
+
+    // フォルダーからノートを削除する
+    public void deleteNoteFromFolder(Long folderId, Long noteId) {
+        FolderNote folderNote = folderNoteRepository.findByFolderIdAndNoteId(folderId, noteId);
+        if (folderNote == null) {
+            throw new NotFoundException("note not found. folderId: " + folderId + ", noteId: " + noteId);
+        }
+        folderNoteRepository.delete(folderNote);
     }
 
     private FolderDto convertToDto(Folder entity) {

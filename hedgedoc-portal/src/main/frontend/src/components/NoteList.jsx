@@ -35,6 +35,13 @@ const NoteList = props => {
     setIsMoveModalOpen(false);
   }
 
+  // フォルダからノートを削除したときのハンドラ
+  const handleDeleteNoteFromFolder = async(id) => {
+    await axios.delete("/api/v1/folders/" + folder.id + "/notes/" + id);
+
+    await reload();
+  }
+
   // 再帰的にフォルダ移動先選択のオプションを生成する
   const mapFolder = folders => (
     folders.map(folder => ({
@@ -79,9 +86,21 @@ const NoteList = props => {
     },
     {
       key: '2',
+      label: (
+        <div
+          onClick={() => {
+            handleDeleteNoteFromFolder(id)
+          }}
+        >
+          delete from folder
+        </div>
+      ),
+    },
+    {
+      key: '3',
       danger: true,
-      label: 'delete'
-    }
+      label: 'delete from folder'
+    },
   ]
 
   const cardHead = note => (
