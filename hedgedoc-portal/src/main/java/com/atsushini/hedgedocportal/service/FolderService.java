@@ -10,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.atsushini.hedgedocportal.dto.FolderDto;
 import com.atsushini.hedgedocportal.dto.NoteDto;
+import com.atsushini.hedgedocportal.dto.CurrentUserDto;
 import com.atsushini.hedgedocportal.entity.Folder;
 import com.atsushini.hedgedocportal.entity.Note;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
@@ -24,8 +25,8 @@ public class FolderService {
 
     private final RestTemplate restTemplate;
 
-    public List<FolderDto> getFolderTree(String userId) {
-        List<Folder> rootFolders = folderRepository.findByUserHedgedocIdAndParentFolderIsNull(userId);
+    public List<FolderDto> getFolderTree(CurrentUserDto userDto) {
+        List<Folder> rootFolders = folderRepository.findByUserHedgedocIdAndParentFolderIsNull(userDto.getHedgedocId());
 
         return rootFolders.stream()
             .map(this::convertToDtoRecursively)

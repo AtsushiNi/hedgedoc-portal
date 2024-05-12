@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.atsushini.hedgedocportal.dto.CurrentUserDto;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +28,7 @@ public class MeApiController {
 
         // sessionがなければ認証エラー。Cookie設定ページへ遷移させる
         HttpSession session = request.getSession(false);
-        if (session == null) {
+        if (session == null || session.getAttribute("currentUser") == null) {
             System.out.println("no session. set cookie.");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
@@ -35,7 +37,8 @@ public class MeApiController {
 
         // HedgeDocのCookieをセット
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Cookie", (String)session.getAttribute("cookie"));
+        String cookie = ((CurrentUserDto) session.getAttribute("currentUser")).getCookie();
+        headers.add("Cookie", cookie);
 
         // HedgeDocからアカウント情報を取得
         ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, new HttpEntity<String>(headers), String.class);

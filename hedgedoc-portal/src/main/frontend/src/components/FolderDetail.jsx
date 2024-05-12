@@ -73,14 +73,14 @@ export default function FolderDetail() {
     }
   ]
 
-  const cardHead = (title, id) => (
+  const cardHead = note => (
     <div style={{display: "flex", justifyContent: "space-between"}}>
       <div
-        onClick={() => window.open("http://localhost:3000/" + id, "_blank")}
+        onClick={() => window.open("http://localhost:3000/" + note.hedgedocId, "_blank")}
         style={{ lineHeight: "40px", width: "200px" }}
-      >{title}</div>
+      >{note.title}</div>
       <Dropdown
-        menu={{ items: noteMenuItems(id) }}
+        menu={{ items: noteMenuItems(note.id) }}
         onClick={e => e.preventDefault()}
         style={{ lineHeight: "40px", marginRight: "-20px" }}
       >
@@ -103,7 +103,7 @@ export default function FolderDetail() {
         {notes.map(note => (
           <Card
             key={note.id}
-            title={cardHead(note.title, note.hedgedocId)}
+            title={cardHead(note)}
             style={cardStyle}
             headStyle={cardHeaderStyle}
           >

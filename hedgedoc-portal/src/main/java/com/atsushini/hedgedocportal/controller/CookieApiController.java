@@ -5,6 +5,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.atsushini.hedgedocportal.dto.CurrentUserDto;
+import com.atsushini.hedgedocportal.service.UserService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +17,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CookieApiController {
 
+    private final UserService userService;
+
     @PostMapping
     public void setCookie(@RequestBody PostBody requestBody, HttpServletRequest request) {
 
         HttpSession session = request.getSession();
-        System.out.println(requestBody.getCookie());
-        session.setAttribute("cookie", requestBody.getCookie());
+
+        CurrentUserDto user = userService.getUserByCookie(requestBody.getCookie());
+        // セッションにユーザーを保存
+        session.setAttribute("currentUser", user);
     }
 
     public static class PostBody {
