@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Divider, Breadcrumb } from 'antd';
+import { HomeFilled } from '@ant-design/icons';
 import axios from 'axios';
 import FolderList from '../components/FolderList';
 import NoteList from '../components/NoteList';
@@ -45,6 +46,9 @@ export default function FolderDetail() {
   return (
     <div className="container">
       <Breadcrumb style={{ cursor: "pointer", marginBottom: 30 }}>
+        <Breadcrumb.Item onClick={() => navigate("/")}>
+          <HomeFilled />
+        </Breadcrumb.Item>
         {folder?.parentFolders.map(folder => (
           <Breadcrumb.Item key={folder.id} onClick={() => navigate("/folders/" + folder.id)}>
             {folder.title}
