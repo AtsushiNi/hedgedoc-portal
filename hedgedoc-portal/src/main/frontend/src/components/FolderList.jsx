@@ -4,12 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 const FolderList = props => {
-  const { folder, folders, folderTree, fetchFolder, fetchFolders } = props
+  const { folder: currentFolder, folders, folderTree, fetchFolder, fetchFolders } = props
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createFolderName, setCreateFolderName] = useState("");
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [moveToFolderId, setMoveToFolderId] = useState(null);
-  const [moveFolderId, setMoveFolderId] = useState(null);
+  const [moveFolder, setMoveFolder] = useState(null);
   const navigate = useNavigate();
   const inputRef = useRef(null);
 
@@ -25,7 +25,7 @@ const FolderList = props => {
 
   // フォルダ作成を実行したときのハンドラ
   const handleCreateFolder = async() => {
-    const data = { title: createFolderName, parentId: folder?.id };
+    const data = { title: createFolderName, parentId: currentFolder?.id };
     await axios.post("/api/v1/folders", data);
 
     setIsCreateModalOpen(false);
@@ -47,7 +47,7 @@ const FolderList = props => {
   const handleMoveItem = async() => {
     const data = { toFolderId: moveToFolderId };
 
-    await axios.post("/api/v1/folders/" + moveFolderId + "/move", data);
+    await axios.post("/api/v1/folders/" + moveFolder.id + "/move", data);
 
     // 表示しているページのフォルダ情報を更新
     await fetchFolder();
@@ -57,11 +57,29 @@ const FolderList = props => {
     setIsMoveModalOpen(false);
   }
 
+  // 引数のtargetFolderが引数のfolderもしくはその子孫かどうかを判定
+  const isCurrentFolderOrSubFolder = (targetFolder, folder) => {
+    // moveFolderを選択するまでにレンダリングされる場合
+    if (folder == null) return true;
+
+    if (targetFolder.id === folder.id) {
+      return true;
+    }
+    // folderのsubFoldersが存在する場合、それらの子孫も再帰的にチェック
+    const isDescendants = folder.subFolders?.some(subFolder => isCurrentFolderOrSubFolder(targetFolder, subFolder));
+    if (isDescendants) {
+      return true;
+    }
+
+    return false;
+  }
+
   // 再帰的にフォルダ移動先選択のオプションを生成する
   const mapFolder = folders => (
     folders?.map(folder => ({
       value: folder.id,
       label: folder.title,
+      disabled: isCurrentFolderOrSubFolder(folder, moveFolder),
       children: mapFolder(folder.subFolders)
     }))
   );
@@ -89,7 +107,7 @@ const FolderList = props => {
     border: "none",
   };
 
-  const folderMenuItems = id => [
+  const folderMenuItems = folder => [
     {
       key: "1",
       label: (
@@ -103,7 +121,7 @@ const FolderList = props => {
       label: (
         <div onClick={() => {
           setIsMoveModalOpen(true);
-          setMoveFolderId(id);
+          setMoveFolder(folder);
         }}>
           move
         </div>
@@ -118,7 +136,7 @@ const FolderList = props => {
         style={{ lineHeight: "40px", width: "200px" }}
       >{folder.title}</div>
       <Dropdown
-        menu={{ items: folderMenuItems(folder.id) }}
+        menu={{ items: folderMenuItems(folder) }}
         onClick={e => {
           console.log("click")
           e.preventDefault()
