@@ -25,11 +25,15 @@ const FolderList = props => {
 
   // フォルダ作成を実行したときのハンドラ
   const handleCreateFolder = async() => {
-    const data = { title: createFolderName, parentId: currentFolder?.id };
+    const data = { title: createFolderName, parentFolderId: currentFolder?.id };
     await axios.post("/api/v1/folders", data);
 
     setIsCreateModalOpen(false);
-    fetchFolders();
+
+    // 表示しているページのフォルダ情報を更新
+    await fetchFolder();
+    // 移動先フォルダツリーを更新
+    await fetchFolders();
   }
 
   // 移動先フォルダを選択した時のハンドラ
