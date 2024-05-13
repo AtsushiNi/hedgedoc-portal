@@ -123,6 +123,16 @@ public class FolderService {
         folderRepository.save(folder);
     }
 
+    // フォルダーを更新する
+    public void updateFolder(Long folderId, String title) {
+        Folder folder = folderRepository.findById(folderId).orElse(null);
+        if (folder == null) throw new NotFoundException("Folder not found with ID: " + folderId);        
+
+        folder.setTitle(title);
+
+        folderRepository.save(folder);
+    }
+
     // フォルダーからノートを削除する
     public void deleteNoteFromFolder(Long folderId, Long noteId) {
         FolderNote folderNote = folderNoteRepository.findByFolderIdAndNoteId(folderId, noteId);

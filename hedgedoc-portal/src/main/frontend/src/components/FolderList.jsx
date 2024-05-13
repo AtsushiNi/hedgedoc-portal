@@ -10,13 +10,21 @@ const FolderList = props => {
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [moveToFolderId, setMoveToFolderId] = useState(null);
   const [moveFolder, setMoveFolder] = useState(null);
+  const [isChangeFolderNameModalOpen, setIsChangeFolderNameModalOpen] = useState(false);
+  const [changeNameFolderId, setChangeNameFolderId] = useState(null);
+  const [changeFolderName, setChangeFolderName] = useState("");
   const navigate = useNavigate();
-  const inputRef = useRef(null);
+  const createInputRef = useRef(null);
+  const changeNameInputRef = useRef(null);
 
   useEffect(() => {
     // モーダルが開いた時inputにフォーカスする
-    setTimeout(() => {inputRef.current?.focus()}, 2)
+    setTimeout(() => {createInputRef.current?.focus()}, 2)
   }, [isCreateModalOpen])
+  useEffect(() => {
+    // モーダルが開いた時inputにフォーカスする
+    setTimeout(() => {changeNameInputRef.current?.focus()}, 2)
+  }, [isChangeFolderNameModalOpen])
 
   // 新規フォルダボタンを押下したときのハンドラ
   const handleClickModalOpenButton = () => {
@@ -59,6 +67,19 @@ const FolderList = props => {
     await fetchFolders();
 
     setIsMoveModalOpen(false);
+  }
+
+  // ファイル名変更を実行したときのハンドラ
+  const handleChangeFolderName = async() => {
+    const data = { title: changeFolderName };
+    await axios.put("/api/v1/folders/" + changeNameFolderId, data);
+
+    setIsChangeFolderNameModalOpen(false);
+
+    // 表示しているページのフォルダ情報を更新
+    await fetchFolder();
+    // 移動先フォルダツリーを更新
+    await fetchFolders();
   }
 
   // 引数のtargetFolderが引数のfolderもしくはその子孫かどうかを判定
@@ -115,7 +136,10 @@ const FolderList = props => {
     {
       key: "1",
       label: (
-        <div>
+        <div onClick={() => {
+          setIsChangeFolderNameModalOpen(true);
+          setChangeNameFolderId(folder.id);
+        }}>
           change title
         </div>
       )
@@ -182,7 +206,7 @@ const FolderList = props => {
       >
         <Form style={{ marginTop: 50 }}>
           <Form.Item label="フォルダ名">
-            <Input ref={inputRef} value={createFolderName} onChange={e => setCreateFolderName(e.target.value)}/>
+            <Input ref={createInputRef} value={createFolderName} onChange={e => setCreateFolderName(e.target.value)}/>
           </Form.Item>
         </Form>
       </Modal>
@@ -198,6 +222,18 @@ const FolderList = props => {
           changeOnSelect
           onChange={handleChangeMoveToFolder}
         />
+      </Modal>
+      <Modal
+        title="フォルダのタイトル変更"
+        open={isChangeFolderNameModalOpen}
+        onCancel={() => setIsChangeFolderNameModalOpen(false)}
+        onOk={handleChangeFolderName}
+      >
+        <Form style={{ marginTop: 50 }}>
+          <Form.Item label="フォルダ名">
+            <Input ref={changeNameInputRef} value={changeFolderName} onChange={e => setChangeFolderName(e.target.value)}/>
+          </Form.Item>
+        </Form>
       </Modal>
     </>
   )
