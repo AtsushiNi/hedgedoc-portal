@@ -1,12 +1,15 @@
 import { useRef, useState, useEffect } from "react";
-import { Flex, Card, Button, Modal, Form, Input } from 'antd';
+import { Flex, Card, Button, Modal, Form, Input, Dropdown, Space, Cascader } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 const FolderList = props => {
-  const { folder, folders, fetchFolders } = props
+  const { folder, folders, folderTree, fetchFolder, fetchFolders } = props
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createFolderName, setCreateFolderName] = useState("");
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [moveToFolderId, setMoveToFolderId] = useState(null);
+  const [moveFolderId, setMoveFolderId] = useState(null);
   const navigate = useNavigate();
   const inputRef = useRef(null);
 
@@ -28,6 +31,41 @@ const FolderList = props => {
     setIsCreateModalOpen(false);
     fetchFolders();
   }
+
+  // 移動先フォルダを選択した時のハンドラ
+  const handleChangeMoveToFolder = list => {
+    if (list.length === 0) {
+      setMoveToFolderId(null);
+      return;
+    }
+
+    const selectedFolderId = list[list.length - 1];
+    setMoveToFolderId(selectedFolderId);
+  }
+
+  // フォルダへの移動を実行したときのハンドラ
+  const handleMoveItem = async() => {
+    const data = { toFolderId: moveToFolderId };
+
+    await axios.post("/api/v1/folders/" + moveFolderId + "/move", data);
+
+    // 表示しているページのフォルダ情報を更新
+    await fetchFolder();
+    // 移動先フォルダツリーを更新
+    await fetchFolders();
+
+    setIsMoveModalOpen(false);
+  }
+
+  // 再帰的にフォルダ移動先選択のオプションを生成する
+  const mapFolder = folders => (
+    folders?.map(folder => ({
+      value: folder.id,
+      label: folder.title,
+      children: mapFolder(folder.subFolders)
+    }))
+  );
+  const folderOptions = mapFolder(folderTree);
 
   const cardStyle = {
     width: 280,
@@ -51,6 +89,47 @@ const FolderList = props => {
     border: "none",
   };
 
+  const folderMenuItems = id => [
+    {
+      key: "1",
+      label: (
+        <div>
+          change title
+        </div>
+      )
+    },
+    {
+      key: "2",
+      label: (
+        <div onClick={() => {
+          setIsMoveModalOpen(true);
+          setMoveFolderId(id);
+        }}>
+          move
+        </div>
+      )
+    }
+  ]
+
+  const cardHead = folder => (
+    <div style={{ display: "flex", justifyContent: "space-between" }}>
+      <div
+        onClick={() => navigate("/folders/" + folder.id)}
+        style={{ lineHeight: "40px", width: "200px" }}
+      >{folder.title}</div>
+      <Dropdown
+        menu={{ items: folderMenuItems(folder.id) }}
+        onClick={e => {
+          console.log("click")
+          e.preventDefault()
+        }}
+        style={{ lineHeight: "40px", marginRight: "-20px" }}
+      >
+        <Space>...</Space>
+      </Dropdown>
+    </div>
+  )
+
   return (
     <>
       <Flex justify="space-between" style={{ paddingTop: "30px", paddingBottom: "20px" }}>
@@ -61,11 +140,15 @@ const FolderList = props => {
         {folders?.map(folder => (
           <Card
             key={folder.id}
-            title={folder.title}
-            onClick={() => navigate("/folders/" + folder.id)}
+            title={cardHead(folder)}
             style={folderCardStyle}
             headStyle={cardHeaderStyle}
-          ></Card>
+          >
+            <p
+              style={{ margin: "-25px -24px", height: "80px", paddingTop: 20 }}
+              onClick={() => navigate("/folders/" + folder.id)}
+            ></p>
+          </Card>
         ))}
       </Flex>
       <Modal
@@ -80,6 +163,19 @@ const FolderList = props => {
             <Input ref={inputRef} value={createFolderName} onChange={e => setCreateFolderName(e.target.value)}/>
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="移動先フォルダの選択"
+        open={isMoveModalOpen}
+        onCancel={() => setIsMoveModalOpen(false)}
+        onOk={handleMoveItem}
+      >
+        <Cascader
+          options={folderOptions}
+          expandTrigger="hover"
+          changeOnSelect
+          onChange={handleChangeMoveToFolder}
+        />
       </Modal>
     </>
   )

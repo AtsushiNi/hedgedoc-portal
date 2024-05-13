@@ -61,7 +61,7 @@ export default function FolderDetail() {
 
       <Divider style={{ background: "silver" }} />
 
-      <FolderList folder={null} folders={folder?.subFolders} fetchFolders={fetchFolders} />
+      <FolderList folder={null} folders={folder?.subFolders} folderTree={folders} fetchFolder={fetchFolder} fetchFolders={fetchFolders} />
     </div>
   )
 }

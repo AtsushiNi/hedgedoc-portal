@@ -74,7 +74,7 @@ export default function Home() {
 
       <Divider style={{ background: "silver" }} />
 
-      <FolderList folder={null} folders={folders} fetchFolders={fetchFolders} />
+      <FolderList folder={null} folders={folders} folderTree={folders} fetchFolder={() => {}} fetchFolders={fetchFolders} />
     </div>
   );
 }

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.atsushini.hedgedocportal.dto.CurrentUserDto;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
-import com.atsushini.hedgedocportal.service.FolderService;
 import com.atsushini.hedgedocportal.service.NoteService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,13 +23,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NoteApiController {
     
-    private final FolderService folderService;
     private final NoteService noteService;
 
-    @PostMapping("/move")
-    public ResponseEntity<String> moveNote(@RequestBody MoveNoteRequest request) {
+    @PostMapping("/{id}/move")
+    public ResponseEntity<String> moveNote(@PathVariable Long id, @RequestBody MoveNoteRequest request) {
         try {
-            noteService.moveNote(request.getNoteId(), request.getFromFolderId(), request.getToFolderId());
+            noteService.moveNote(id, request.getFromFolderId(), request.getToFolderId());
             return ResponseEntity.ok("Note moved successfully");
         } catch (NotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -63,7 +61,6 @@ public class NoteApiController {
     @Data
     public static class MoveNoteRequest {
 
-        private Long noteId;
         private Long fromFolderId;
         private Long toFolderId;
     }

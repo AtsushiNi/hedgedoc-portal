@@ -65,6 +65,18 @@ public class FolderApiController {
         return ResponseEntity.ok("created folder successfully");
     }
     
+    @PostMapping("/{id}/move")
+    public ResponseEntity<String> moveFolder(@PathVariable Long id, @RequestBody MoveFolderRequest request) {
+        try {
+            folderService.moveFolder(id, request.getToFolderId());
+            return ResponseEntity.ok("Folder move successfully");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to move folder: " + e.getMessage());
+        }
+    }
+
     // フォルダーからノートを削除する
     @DeleteMapping("/{id}/notes/{noteId}")
     public ResponseEntity<String> deleteNoteFromFolder(HttpServletRequest request, @PathVariable Long id, @PathVariable Long noteId) {
@@ -96,5 +108,10 @@ public class FolderApiController {
     public static class CreateRequest {
         private String title;
         private Long parentFolderId;
+    }
+
+    @Data
+    public static class MoveFolderRequest {
+        private Long toFolderId;
     }
 }

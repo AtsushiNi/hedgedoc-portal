@@ -108,6 +108,21 @@ public class FolderService {
         folderRepository.save(newFolder);
     }
 
+    // フォルダーを移動する
+    public void moveFolder(Long folderId, Long toFolderId) {
+        Folder folder = folderRepository.findById(folderId).orElse(null);
+        if (folder == null) throw new NotFoundException("Folder not found with ID: " + folderId);        
+
+        Folder toFolder = null;
+        if (toFolderId != null) {
+            toFolder = folderRepository.findById(toFolderId).orElse(null);
+            if (toFolder == null) throw new NotFoundException("to folder not found with ID: " + toFolderId);
+        }
+
+        folder.setParentFolder(toFolder);
+        folderRepository.save(folder);
+    }
+
     // フォルダーからノートを削除する
     public void deleteNoteFromFolder(Long folderId, Long noteId) {
         FolderNote folderNote = folderNoteRepository.findByFolderIdAndNoteId(folderId, noteId);

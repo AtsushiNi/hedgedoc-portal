@@ -28,9 +28,9 @@ const NoteList = props => {
   const handleMoveItem = async() => {
     if (moveToFolderId === null) return;
 
-    const data = { noteId: moveItemId, fromFolderId: folder?.id, toFolderId: moveToFolderId };
+    const data = { fromFolderId: folder?.id, toFolderId: moveToFolderId };
 
-    await axios.post("/api/v1/notes/move", data);
+    await axios.post("/api/v1/notes/" + moveItemId +"/move", data);
 
     await reload();
 
