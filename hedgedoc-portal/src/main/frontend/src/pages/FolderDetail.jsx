@@ -20,7 +20,6 @@ export default function FolderDetail() {
     try {
       const response = await axios.get("/api/v1/folders/" + folderId);
       setFolder(response.data);
-      console.log("setFolder")
     } catch (error) {
       if (error.status === 403) {
         console.log("wrong cookie for HedgeDoc.");
@@ -43,10 +42,9 @@ export default function FolderDetail() {
     }
   }
 
-  console.log("render")
   return (
     <div className="container">
-      <Breadcrumb style={{ cursor: "pointer" }}>
+      <Breadcrumb style={{ cursor: "pointer", marginBottom: 30 }}>
         {folder?.parentFolders.map(folder => (
           <Breadcrumb.Item key={folder.id} onClick={() => navigate("/folders/" + folder.id)}>
             {folder.title}
@@ -59,7 +57,7 @@ export default function FolderDetail() {
 
       <Divider style={{ background: "silver" }} />
 
-      <FolderList folders={folder?.subFolders} />
+      <FolderList folder={null} folders={folder?.subFolders} fetchFolders={fetchFolders} />
     </div>
   )
 }

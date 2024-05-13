@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,8 +19,8 @@ import com.atsushini.hedgedocportal.service.FolderService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
-
 
 @RestController
 @RequestMapping("api/v1/folders")
@@ -48,6 +50,21 @@ public class FolderApiController {
         return folderService.getById(id);
     }
 
+    @PostMapping
+    public ResponseEntity<String> createFolder(HttpServletRequest request, @RequestBody CreateRequest requestBody) {
+        // sessionがなければ認証エラー。Cookie設定ページへ遷移させる
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("currentUser") == null) {
+            System.out.println("no session. set cookie.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        CurrentUserDto currentUser = (CurrentUserDto) session.getAttribute("currentUser");
+
+        folderService.create(requestBody.getTitle(), requestBody.getParentFolderId(), currentUser);
+
+        return ResponseEntity.ok("created folder successfully");
+    }
+    
     // フォルダーからノートを削除する
     @DeleteMapping("/{id}/notes/{noteId}")
     public ResponseEntity<String> deleteNoteFromFolder(HttpServletRequest request, @PathVariable Long id, @PathVariable Long noteId) {
@@ -75,4 +92,9 @@ public class FolderApiController {
         }
     }
 
+    @Data
+    public static class CreateRequest {
+        private String title;
+        private Long parentFolderId;
+    }
 }

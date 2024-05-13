@@ -57,9 +57,10 @@ export default function Home() {
   return (
     <div className="container">
       <Flex
-        justify="flex-end"
+        justify="space-between"
         style={{ paddingTop: "50px", paddingBottom: "20px" }}
       >
+        <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>未分類ノート</div>
         <Button
           type="primary"
           onClick={() => window.open(HEDGEDOC_URL + "/new")}
@@ -68,13 +69,12 @@ export default function Home() {
         </Button>
       </Flex>
 
-      <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>未分類ノート</div>
       <NoteList notes={showingNotes} folder={null} folders={folders} reload={fetchHistory} root />
       <Pagination defaultCurrent={1} total={notes.length} defaultPageSize={notesPageSize} onChange={handleChangeNotesPageNumber} />
 
       <Divider style={{ background: "silver" }} />
 
-      <FolderList folders={folders} />
+      <FolderList folder={null} folders={folders} fetchFolders={fetchFolders} />
     </div>
   );
 }

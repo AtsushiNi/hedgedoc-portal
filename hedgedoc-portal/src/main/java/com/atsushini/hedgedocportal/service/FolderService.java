@@ -15,9 +15,11 @@ import com.atsushini.hedgedocportal.dto.NoteDto;
 import com.atsushini.hedgedocportal.entity.Folder;
 import com.atsushini.hedgedocportal.entity.FolderNote;
 import com.atsushini.hedgedocportal.entity.Note;
+import com.atsushini.hedgedocportal.entity.User;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.repository.FolderNoteRepository;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
+import com.atsushini.hedgedocportal.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +29,7 @@ public class FolderService {
     
     private final FolderNoteRepository folderNoteRepository;
     private final FolderRepository folderRepository;
+    private final UserRepository UserRepository;
 
     private final RestTemplate restTemplate;
 
@@ -86,6 +89,23 @@ public class FolderService {
         }
         
         return folder.getUser().getId();
+    }
+
+    // フォルダーを作成する
+    public void create(String title, Long parentFolderId, CurrentUserDto user) {
+        Folder newFolder = new Folder();
+
+        if (parentFolderId != null) {
+            Folder parentFolder = folderRepository.findById(parentFolderId).orElse(null);
+            newFolder.setParentFolder(parentFolder);
+        }
+
+        newFolder.setTitle(title);
+
+        User currentUser = UserRepository.findById(user.getId()).orElse(null);
+        newFolder.setUser(currentUser);
+
+        folderRepository.save(newFolder);
     }
 
     // フォルダーからノートを削除する
