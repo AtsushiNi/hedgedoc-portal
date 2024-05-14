@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Divider, Breadcrumb } from 'antd';
+import { Divider, Breadcrumb, Flex, Button } from 'antd';
 import { HomeFilled } from '@ant-design/icons';
 import axios from 'axios';
 import FolderList from '../components/FolderList';
@@ -16,6 +16,13 @@ export default function FolderDetail() {
     fetchFolder();
     fetchFolders();
   }, [folderId])
+
+  const handleCreateNote = async() => {
+    const data = { parentFolderId: folderId };
+    const response = await axios.post("/api/v1/notes", data);
+    const { data: newNoteUrl } = response;
+    window.open(newNoteUrl);
+  }
 
   const fetchFolder = async() => {
     try {
@@ -62,7 +69,18 @@ export default function FolderDetail() {
         ))}
       </Breadcrumb>
 
-      <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>ノート</div>
+      <Flex
+        justify="space-between"
+        style={{ paddingTop: "50px", paddingBottom: "20px" }}
+      >
+        <div style={{ color: "white", textAlign: "left", fontSize: "large" }}>ノート</div>
+        <Button
+          type="primary"
+          onClick={handleCreateNote}
+        >
+          +新規ノート
+        </Button>
+      </Flex>
       <NoteList notes={folder?.notes} folder={folder} folders={folders} reload={fetchFolder} />
 
       <Divider style={{ background: "silver" }} />

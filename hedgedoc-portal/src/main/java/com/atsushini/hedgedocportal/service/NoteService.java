@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -90,6 +91,35 @@ public class NoteService {
             .toList();
         
         return noteDtoListUnfoldered;
+    }
+
+    public String createNote(Long parentFolderId) {
+        Folder parentFolder = folderRepository.findById(parentFolderId).orElse(null);
+        if (parentFolder == null) throw new NotFoundException("Folder not found with ID: " + parentFolderId);        
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.TEXT_MARKDOWN);
+
+        // HedgeDocの新規ノートを作成し、URLを取得する
+        ResponseEntity<String> response = restTemplate.exchange(hedgedocUrl + "/new", HttpMethod.POST, new HttpEntity<>(headers), String.class);
+        String newNoteUrl = response.getHeaders().getLocation().toString();
+
+        // URLからHedgeDocのIDを取得する
+        String[] segment = newNoteUrl.split("/");
+        String newNoteHedgedocId = segment[segment.length - 1];
+
+        // Noteエンティティを作成
+        Note note = new Note();
+        note.setHedgedocId(newNoteHedgedocId);
+        noteRepository.save(note);
+
+        // FolderNoteエンティティを作成
+        FolderNote folderNote = new FolderNote();
+        folderNote.setFolder(parentFolder);
+        folderNote.setNote(note);
+        folderNoteRepository.save(folderNote);
+
+        return newNoteUrl;
     }
 
     public void moveNote(Long noteId, Long fromFolderId, Long toFolderId) {

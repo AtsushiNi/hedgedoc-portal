@@ -25,6 +25,18 @@ public class NoteApiController {
     
     private final NoteService noteService;
 
+    @PostMapping
+    public ResponseEntity<String> createNote(@RequestBody CreateNoteRequest request) {
+        try {
+            String newNoteUrl = noteService.createNote(request.getParentFolderId()); 
+            return ResponseEntity.ok(newNoteUrl);
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to create note: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/{id}/move")
     public ResponseEntity<String> moveNote(@PathVariable Long id, @RequestBody MoveNoteRequest request) {
         try {
@@ -56,6 +68,11 @@ public class NoteApiController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
+    }
+
+    @Data
+    public static class CreateNoteRequest {
+        private Long parentFolderId;
     }
 
     @Data

@@ -186,10 +186,7 @@ const FolderList = props => {
       >{folder.title}</div>
       <Dropdown
         menu={{ items: folderMenuItems(folder) }}
-        onClick={e => {
-          console.log("click")
-          e.preventDefault()
-        }}
+        onClick={e => e.preventDefault()}
         style={{ lineHeight: "40px", marginRight: "-20px" }}
       >
         <Space>...</Space>
