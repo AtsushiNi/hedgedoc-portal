@@ -43,6 +43,12 @@ export default function FolderDetail() {
     }
   }
 
+  // フォルダーリスト画面のデータを更新する処理
+  const fetchDataForFolderList = () => {
+    fetchFolder();
+    fetchFolders();
+  }
+
   return (
     <div className="container">
       <Breadcrumb style={{ cursor: "pointer", marginBottom: 30 }}>
@@ -61,7 +67,7 @@ export default function FolderDetail() {
 
       <Divider style={{ background: "silver" }} />
 
-      <FolderList folder={folder} folders={folder?.subFolders} folderTree={folders} fetchFolder={fetchFolder} fetchFolders={fetchFolders} />
+      <FolderList folder={folder} folders={folder?.subFolders} folderTree={folders} fetchData={fetchDataForFolderList} />
     </div>
   )
 }

@@ -133,6 +133,14 @@ public class FolderService {
         folderRepository.save(folder);
     }
 
+    // フォルダーを削除する
+    public void deleteFolder(Long folderId) {
+        Folder folder = folderRepository.findById(folderId).orElse(null);
+        if (folder == null) throw new NotFoundException("Folder not found with ID: " + folderId);        
+
+        recursivelyDeleteFolder(folder);
+    }
+
     // フォルダーからノートを削除する
     public void deleteNoteFromFolder(Long folderId, Long noteId) {
         FolderNote folderNote = folderNoteRepository.findByFolderIdAndNoteId(folderId, noteId);
@@ -174,5 +182,18 @@ public class FolderService {
             tree = getParentFolderTree(tree);
         }
         return tree;
+    }
+
+    // 再帰的にフォルダとその子孫のフォルダを削除
+    private void recursivelyDeleteFolder(Folder folder) {
+        for (Folder subFolder : folder.getSubFolders()) {
+            recursivelyDeleteFolder(subFolder);
+        }
+        // フォルダに紐づくフォルダノートを削除
+        if (folder.getFolderNotes() != null) {
+            folderNoteRepository.deleteAll(folder.getFolderNotes());
+        }
+        // フォルダを削除
+        folderRepository.delete(folder);
     }
 }

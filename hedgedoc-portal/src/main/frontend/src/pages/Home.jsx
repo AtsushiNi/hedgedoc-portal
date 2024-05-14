@@ -47,6 +47,12 @@ export default function Home() {
     }
   }
 
+  // フォルダーリスト画面のデータを更新する処理
+  const fetchDataForFolderList = () => {
+    fetchHistory();
+    fetchFolders();
+  }
+
   const handleChangeNotesPageNumber = pageIndex => {
     const startIndex = notesPageSize * (pageIndex - 1);
     const endIndex = Math.min(notesPageSize * pageIndex, notes.length);
@@ -74,7 +80,7 @@ export default function Home() {
 
       <Divider style={{ background: "silver" }} />
 
-      <FolderList folder={null} folders={folders} folderTree={folders} fetchFolder={() => {}} fetchFolders={fetchFolders} />
+      <FolderList folder={null} folders={folders} folderTree={folders} fetchData={fetchDataForFolderList} />
     </div>
   );
 }

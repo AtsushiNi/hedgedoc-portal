@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 const FolderList = props => {
-  const { folder: currentFolder, folders, folderTree, fetchFolder, fetchFolders } = props
+  const { folder: currentFolder, folders, folderTree, fetchData } = props
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [createFolderName, setCreateFolderName] = useState("");
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
@@ -13,6 +13,8 @@ const FolderList = props => {
   const [isChangeFolderNameModalOpen, setIsChangeFolderNameModalOpen] = useState(false);
   const [changeNameFolderId, setChangeNameFolderId] = useState(null);
   const [changeFolderName, setChangeFolderName] = useState("");
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [folderToDelete, setFolderToDelete] = useState(null);
   const navigate = useNavigate();
   const createInputRef = useRef(null);
   const changeNameInputRef = useRef(null);
@@ -38,10 +40,8 @@ const FolderList = props => {
 
     setIsCreateModalOpen(false);
 
-    // 表示しているページのフォルダ情報を更新
-    await fetchFolder();
-    // 移動先フォルダツリーを更新
-    await fetchFolders();
+    // 表示しているデータを更新
+    await fetchData();
   }
 
   // 移動先フォルダを選択した時のハンドラ
@@ -61,10 +61,8 @@ const FolderList = props => {
 
     await axios.post("/api/v1/folders/" + moveFolder.id + "/move", data);
 
-    // 表示しているページのフォルダ情報を更新
-    await fetchFolder();
-    // 移動先フォルダツリーを更新
-    await fetchFolders();
+    // 表示しているデータを更新
+    await fetchData();
 
     setIsMoveModalOpen(false);
   }
@@ -76,10 +74,24 @@ const FolderList = props => {
 
     setIsChangeFolderNameModalOpen(false);
 
-    // 表示しているページのフォルダ情報を更新
-    await fetchFolder();
-    // 移動先フォルダツリーを更新
-    await fetchFolders();
+    // 表示しているデータを更新
+    await fetchData();
+  }
+
+  // フォルダ削除確認モーダルを開くハンドラ
+  const handleOpenDeleteConfirm = folder => {
+    setFolderToDelete(folder);
+    setIsDeleteModalOpen(true);
+  }
+
+  // フォルダ削除を実行したときのハンドラ
+  const handleDelete = async() => {
+    await axios.delete("/api/v1/folders/" + folderToDelete.id);
+
+    setIsDeleteModalOpen(false);
+
+    // 表示しているデータを更新
+    await fetchData();
   }
 
   // 引数のtargetFolderが引数のfolderもしくはその子孫かどうかを判定
@@ -152,6 +164,15 @@ const FolderList = props => {
           setMoveFolder(folder);
         }}>
           move
+        </div>
+      )
+    },
+    {
+      key: "3",
+      danger: true,
+      label: (
+        <div onClick={() => handleOpenDeleteConfirm(folder)}>
+          delete
         </div>
       )
     }
@@ -234,6 +255,15 @@ const FolderList = props => {
             <Input ref={changeNameInputRef} value={changeFolderName} onChange={e => setChangeFolderName(e.target.value)}/>
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="フォルダの削除"
+        open={isDeleteModalOpen}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        onOk={handleDelete}
+      >
+        <p>本当にフォルダ<strong>{setFolderToDelete.title}</strong>を削除しますか？</p>
+        <p>削除した場合、該当フォルダ以下の全てのノートが未分類になります</p>
       </Modal>
     </>
   )

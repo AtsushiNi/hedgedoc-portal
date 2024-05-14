@@ -90,6 +90,19 @@ public class FolderApiController {
         }
     }
 
+    // フォルダーを削除する
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteFolder(@PathVariable Long id) {
+        try {
+            folderService.deleteFolder(id);
+            return ResponseEntity.ok("Folder deleted successfully");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete folder: " + e.getMessage());
+        }
+    }
+
     // フォルダーからノートを削除する
     @DeleteMapping("/{id}/notes/{noteId}")
     public ResponseEntity<String> deleteNoteFromFolder(HttpServletRequest request, @PathVariable Long id, @PathVariable Long noteId) {
