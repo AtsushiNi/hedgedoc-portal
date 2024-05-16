@@ -29,7 +29,7 @@ export default function FolderDetail() {
       const response = await axios.get("/api/v1/folders/" + folderId);
       setFolder(response.data);
     } catch (error) {
-      if (error.status === 403) {
+      if (error.response.status === 403) {
         console.log("wrong cookie for HedgeDoc.");
         navigate("/cookie-setting");
       }

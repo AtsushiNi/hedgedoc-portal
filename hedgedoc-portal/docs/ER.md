@@ -21,11 +21,20 @@ erDiagram
         Long id
         String hedgedoc_id
     }
+    rule {
+        Long id
+        String title
+        String regular_expression
+        Long user_id
+        Long folder_id
+    }
 
     user ||--o{ folder : ""
     folder |o--o{ folder : ""
     folder ||--o{ folder_note : ""
     folder_note }|--|| note : ""
+    user ||--o{ rule
+    rule }o--|| folder
 
     user ||..|| HedgeDoc_User : ""
     note ||..|| HedgeDoc_note : ""
@@ -83,9 +92,19 @@ FolderとNoteの中間テーブル
 ## Note
 HedgeDocのユーザーと1対1に対応する
 
-|カラム名|タイプ|説明|
-|--|--|--|
+|カラム名|タイプ|説明| |--|--|--|
 |id|Long|PK|
 |hedgedoc_id|String|HedgeDocのノートのID(FK)|
 
 - トップページでHedgeDocから履歴を取得する際、DBに存在しなければ作成する
+
+## Rule
+正規表現に一致するタイトルのHedgeDocノートを自動的にFolderに分類する
+
+|カラム名|タイプ|説明|
+|--|--|--|
+|id|Long|PK|
+|title|String||
+|regular_expression|String||
+|folder_id|Long|FK|
+|user_id|Long|FK|

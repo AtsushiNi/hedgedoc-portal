@@ -1,6 +1,7 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import { ConfigProvider, theme, Layout, Menu } from 'antd';
 import Home from './pages/Home';
+import Rules from './pages/Rules';
 import CookieSetting from './pages/CookieSetting';
 import FolderDetail from './pages/FolderDetail';
 const { darkAlgorithm } = theme;
@@ -32,6 +33,12 @@ function App() {
     {
       key: 1,
       label: (
+        <a href="/rules">振り分けルール</a>
+      )
+    },
+    {
+      key: 2,
+      label: (
         <a href="/cookie-setting">Cookie設定</a>
       )
     }
@@ -49,12 +56,13 @@ function App() {
               theme="dark"
               mode="horizontal"
               items={menuItems}
-              style={{ fontSize: "large" }}
+              style={{ flex: 1, justifyContent: "end" }}
             />
           </Header>
           <Content style={contentStyle}>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/rules" element={<Rules />} />
               <Route path="/cookie-setting" element={<CookieSetting />} />
               <Route path="/folders/:folderId" element={<FolderDetail />} />
             </Routes>
