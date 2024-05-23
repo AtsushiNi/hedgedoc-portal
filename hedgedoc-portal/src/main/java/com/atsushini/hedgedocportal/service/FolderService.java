@@ -19,6 +19,7 @@ import com.atsushini.hedgedocportal.entity.User;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.repository.FolderNoteRepository;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
+import com.atsushini.hedgedocportal.repository.RuleRepository;
 import com.atsushini.hedgedocportal.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,8 @@ public class FolderService {
     
     private final FolderNoteRepository folderNoteRepository;
     private final FolderRepository folderRepository;
-    private final UserRepository UserRepository;
+    private final UserRepository userRepository;
+    private final RuleRepository ruleRepository;
 
     private final RestTemplate restTemplate;
 
@@ -102,7 +104,7 @@ public class FolderService {
 
         newFolder.setTitle(title);
 
-        User currentUser = UserRepository.findById(user.getId()).orElse(null);
+        User currentUser = userRepository.findById(user.getId()).orElse(null);
         newFolder.setUser(currentUser);
 
         folderRepository.save(newFolder);
@@ -192,6 +194,10 @@ public class FolderService {
         // フォルダに紐づくフォルダノートを削除
         if (folder.getFolderNotes() != null) {
             folderNoteRepository.deleteAll(folder.getFolderNotes());
+        }
+        // フォルダに紐づく振り分けルールを削除
+        if (folder.getRules() != null) {
+            ruleRepository.deleteAll(folder.getRules());
         }
         // フォルダを削除
         folderRepository.delete(folder);

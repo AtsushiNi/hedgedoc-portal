@@ -36,4 +36,7 @@ public class Folder {
 
     @OneToMany(mappedBy = "folder")
     private List<FolderNote> folderNotes;
+
+    @OneToMany(mappedBy = "folder")
+    private List<Rule> rules;
 }
