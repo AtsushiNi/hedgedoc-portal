@@ -1,7 +1,9 @@
 package com.atsushini.hedgedocportal.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -18,12 +20,14 @@ import com.atsushini.hedgedocportal.dto.NoteDto;
 import com.atsushini.hedgedocportal.entity.Folder;
 import com.atsushini.hedgedocportal.entity.FolderNote;
 import com.atsushini.hedgedocportal.entity.Note;
+import com.atsushini.hedgedocportal.entity.Rule;
 import com.atsushini.hedgedocportal.exception.HedgedocApiException;
 import com.atsushini.hedgedocportal.exception.HedgedocForbiddenException;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.repository.FolderNoteRepository;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
 import com.atsushini.hedgedocportal.repository.NoteRepository;
+import com.atsushini.hedgedocportal.repository.RuleRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,6 +38,7 @@ public class NoteService {
     private final FolderRepository folderRepository;
     private final NoteRepository noteRepository;
     private final FolderNoteRepository folderNoteRepository;
+    private final RuleRepository ruleRepository;
     private final RestTemplate restTemplate;
 
     @Value("${hedgedoc.url}")
@@ -89,7 +94,29 @@ public class NoteService {
             .stream()
             .filter(note -> !noteIdListInFolders.contains(note.getId()))
             .toList();
-        
+
+        // 振り分けルールの取得
+        List<Rule> rules = ruleRepository.findByUserId(currentUserDto.getId());
+
+        // 振り分けルールに該当するノートはフォルダに移動する
+        List<Long> movedNoteIdList = new ArrayList<>();
+        for (NoteDto note : noteDtoListUnfoldered) {
+            for (Rule rule : rules) {
+                // ルールの正規表現をコンパイル
+                Pattern pattern = Pattern.compile(rule.getRegularExpression());
+                if (pattern.matcher(note.getTitle()).matches()) {
+                    // ノートがルールにマッチする場合、対応するフォルダに移動
+                    moveNote(note.getId(), null, rule.getFolder().getId());
+                    movedNoteIdList.add(note.getId());
+                    break; // 一つのルールにマッチしたら次のノートに進む
+                }
+            }
+        }
+        noteDtoListUnfoldered = noteDtoListUnfoldered
+            .stream()
+            .filter(note -> !movedNoteIdList.contains(note.getId()))
+            .toList();
+
         return noteDtoListUnfoldered;
     }
 
