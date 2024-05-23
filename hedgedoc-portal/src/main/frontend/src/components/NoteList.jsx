@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Flex, Card, Dropdown, Space, Modal, Cascader } from 'antd';
+import { PushpinTwoTone } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import axios from "axios";
 
@@ -124,6 +125,13 @@ const NoteList = props => {
 
   const cardHead = note => (
     <div style={{display: "flex", justifyContent: "space-between"}}>
+      {
+        isRoot && (
+          note.pinned
+            ? <PushpinTwoTone twoToneColor="red" style={{ marginRight: 10 }}/>
+            : <PushpinTwoTone twoToneColor="gray" style={{ marginRight: 10 }}/>
+        )
+      }
       <div
         onClick={() => window.open(HEDGEDOC_URL + "/" + note.hedgedocId, "_blank")}
         style={{ lineHeight: "40px", width: "200px" }}

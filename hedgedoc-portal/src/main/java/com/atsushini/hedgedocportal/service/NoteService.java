@@ -115,7 +115,15 @@ public class NoteService {
         noteDtoListUnfoldered = noteDtoListUnfoldered
             .stream()
             .filter(note -> !movedNoteIdList.contains(note.getId()))
-            .sorted((note1, note2) -> note2.getUpdatetime().compareTo(note1.getUpdatetime()))
+            .sorted((note1, note2) -> {
+                // isPinnedがtrueのものを前に
+                int pinnedComparison = Boolean.compare(note2.getPinned(), note1.getPinned());
+                if (pinnedComparison != 0) {
+                    return pinnedComparison;
+                }
+                // 両者のisPinnedが同じなら、updateTimeで降順に並び替え
+                return note2.getUpdatetime().compareTo(note1.getUpdatetime());
+            })
             .toList();
 
         return noteDtoListUnfoldered;
@@ -208,6 +216,7 @@ public class NoteService {
 
         noteDto.setTitle(historyItem.getText());
         noteDto.setUpdatetime(historyItem.getTime().toLocalDateTime());
+        noteDto.setPinned(historyItem.isPinned());
 
         return noteDto; 
     }

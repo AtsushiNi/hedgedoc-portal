@@ -14,5 +14,6 @@ public class NoteDto {
     private Long id;
     private String hedgedocId;
     private String title;
+    private Boolean pinned;
     private LocalDateTime updatetime;
 }

@@ -22,5 +22,6 @@ public class HistoryDto {
         private String text;
         private Timestamp time;
         private List<String> tags;
+        private boolean pinned;
     }
 }
