@@ -6,12 +6,15 @@ import { useNavigate } from "react-router-dom";
 const Rules = () => {
   const [rules, setRules] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedRuleId, setSelectedRuleId] = useState(null);
   const [ruleTitle, setRuleTitle] = useState("");
   const [regularExpression, setRegularExpression] = useState("");
   const [folderTree, setFolderTree] = useState([]);
-  const [toFolderId, setToFolderId] = useState(null);
+  const [toFolderIdList, setToFolderIdList] = useState([]);
   const navigate = useNavigate();
   const createInputRef = useRef(null);
+  const updateInputRef = useRef(null);
 
   useEffect(() => {
     fetchRules();
@@ -23,13 +26,39 @@ const Rules = () => {
     setTimeout(() => {createInputRef.current?.focus()}, 2)
   }, [isCreateModalOpen])
 
+  useEffect(() => {
+    // モーダルが開いた時inputにフォーカスする
+    setTimeout(() => {updateInputRef.current?.focus()}, 2)
+  }, [isUpdateModalOpen])
+
   // 振り分けルール作成実行時のハンドラ
   const handleCreateRule = async() => {
+    let toFolderId = null;
+    if (toFolderIdList.length !== 0) toFolderId = toFolderIdList[toFolderIdList.length - 1];
     const data = { title: ruleTitle, regularExpression: regularExpression, folderId: toFolderId };
     await axios.post("/api/v1/rules", data);
 
     fetchRules();
     setIsCreateModalOpen(false);
+  }
+
+  // ルール更新実行時のハンドラ
+  const handleUpdateRule = async() => {
+    let toFolderId = null;
+    if (toFolderIdList.length !== 0) toFolderId = toFolderIdList[toFolderIdList.length - 1];
+    const data = { title: ruleTitle, regularExpression: regularExpression, folderId: toFolderId };
+    await axios.put("/api/v1/rules/" + selectedRuleId, data);
+
+    fetchRules();
+    setIsUpdateModalOpen(false);
+  }
+
+  // モーダルを閉じたときのハンドラ
+  const handleCloseModal = () => {
+    setSelectedRuleId(null);
+    setRuleTitle("");
+    setRegularExpression("");
+    setToFolderIdList([]);
   }
 
   const fetchRules = async() => {
@@ -65,15 +94,36 @@ const Rules = () => {
     }
   }
 
-  // 振り分け先フォルダを選択した時のハンドラ
-  const handleChangeToFolder = list => {
-    if (list.length === 0) {
-      setToFolderId(null);
-      return;
+  // テーブルの行をクリックしたときのハンドラ
+  const handleClickRow = (record, rowIndex) => {
+    // idがrecord.toFolderIdであるフォルダまでのパスを取得する
+    let toFolderIdList = []
+    function search(folders, currentPath) {
+        for (let folder of folders) {
+            let newPath = [...currentPath, folder.id];
+            if (folder.id === record.toFolderId) {
+                toFolderIdList = newPath;
+                return true;
+            }
+            if (folder.subFolders && folder.subFolders.length > 0) {
+                if (search(folder.subFolders, newPath)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
+    search(folderTree, []);
 
-    const selectedFolderId = list[list.length - 1];
-    setToFolderId(selectedFolderId);
+    return {
+      onClick: event => {
+        setSelectedRuleId(record.id);
+        setRuleTitle(record.title);
+        setRegularExpression(record.regularExpression);
+        setToFolderIdList(toFolderIdList);
+        setIsUpdateModalOpen(true);
+      }
+    }
   }
 
   const columns = [
@@ -120,13 +170,14 @@ const Rules = () => {
       <Table
         dataSource={rules}
         columns={columns}
+        onRow={handleClickRow}
       />
       <Modal
         title="新規ルール作成"
         open={isCreateModalOpen}
         onCancel={() => setIsCreateModalOpen(false)}
         onOk={handleCreateRule}
-        afterClose={() => setRuleTitle("")}
+        afterClose={handleCloseModal}
       >
         <Form style={{ marginTop: 50 }}>
           <Form.Item label="タイトル">
@@ -140,7 +191,33 @@ const Rules = () => {
               options={folderOptions}
               expandTrigger="hover"
               changeOnSelect
-              onChange={handleChangeToFolder}
+              onChange={list => setToFolderIdList(list)}
+              value={toFolderIdList}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="ルール更新"
+        open={isUpdateModalOpen}
+        onCancel={() => setIsUpdateModalOpen(false)}
+        onOk={handleUpdateRule}
+        afterClose={handleCloseModal}
+      >
+        <Form style={{ marginTop: 50 }}>
+          <Form.Item label="タイトル">
+            <Input ref={updateInputRef} value={ruleTitle} onChange={e => setRuleTitle(e.target.value)}/>
+          </Form.Item>
+          <Form.Item label="正規表現">
+            <Input value={regularExpression} onChange={e => setRegularExpression(e.target.value)}/>
+          </Form.Item>
+          <Form.Item label="振り分け先フォルダ">
+            <Cascader
+              options={folderOptions}
+              expandTrigger="hover"
+              changeOnSelect
+              onChange={list => setToFolderIdList(list)}
+              value={toFolderIdList}
             />
           </Form.Item>
         </Form>

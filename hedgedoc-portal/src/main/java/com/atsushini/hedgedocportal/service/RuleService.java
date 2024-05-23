@@ -31,6 +31,7 @@ public class RuleService {
         return ruleDtos.stream().map(this::convertToDto).toList();
     }
 
+    // 振り分けルールを作成する
     public void create(String title, String reqularExpression, Long folderId, CurrentUserDto currentUser) {
         Folder folder = folderRepository.findById(folderId).orElse(null);
         if (folder == null) throw new NotFoundException("Folder not found with ID: " + folderId);        
@@ -42,6 +43,21 @@ public class RuleService {
 
         User user = userRepository.findById(currentUser.getId()).orElse(null);
         rule.setUser(user);
+
+        ruleRepository.save(rule);
+    }
+
+    // 振り分けルールを更新する
+    public void update(Long id, String title, String regularExpression, Long folderId) {
+        Rule rule = ruleRepository.findById(id).orElse(null);
+        if (rule == null) throw new NotFoundException("Rule not found with ID: " + id);
+
+        Folder folder = folderRepository.findById(folderId).orElse(null);
+        if (folder == null) throw new NotFoundException("Folder not found with ID: " + folderId);        
+
+        rule.setTitle(title);
+        rule.setRegularExpression(regularExpression);
+        rule.setFolder(folder);
 
         ruleRepository.save(rule);
     }
