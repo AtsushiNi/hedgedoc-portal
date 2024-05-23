@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -75,7 +76,25 @@ public class RuleApiController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update rule: " + e.getMessage());
         }
+    }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteRule(HttpServletRequest request, @PathVariable Long id) {
+        // sessionがなければ認証エラー。Cookie設定ページへ遷移させる
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("currentUser") == null) {
+            System.out.println("no session. set cookie.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+
+        try {
+            ruleService.delete(id);
+            return ResponseEntity.ok("deleted rule successfully");
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete rule: " + e.getMessage());
+        }
     }
 
     @Data

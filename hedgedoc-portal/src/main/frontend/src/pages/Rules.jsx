@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { Button, Flex, Modal, Table, Form, Input, Cascader } from "antd";
+import { FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -7,6 +8,7 @@ const Rules = () => {
   const [rules, setRules] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedRuleId, setSelectedRuleId] = useState(null);
   const [ruleTitle, setRuleTitle] = useState("");
   const [regularExpression, setRegularExpression] = useState("");
@@ -51,6 +53,14 @@ const Rules = () => {
 
     fetchRules();
     setIsUpdateModalOpen(false);
+  }
+
+  // ルール削除実行時のハンドラ
+  const handleDeleteRule = async() => {
+    await axios.delete("/api/v1/rules/" + selectedRuleId);
+
+    fetchRules();
+    setIsDeleteModalOpen(false);
   }
 
   // モーダルを閉じたときのハンドラ
@@ -126,6 +136,13 @@ const Rules = () => {
     }
   }
 
+  // 削除ボタンをクリックしたときのハンドラ
+  const handleClickDelete = (event, record) => {
+    event.stopPropagation();
+    setSelectedRuleId(record.id);
+    setIsDeleteModalOpen(true);
+  }
+
   const columns = [
     {
       title: "title",
@@ -140,6 +157,14 @@ const Rules = () => {
     {
       title: "folder",
       dataIndex: "toFolderTitle",
+      key: "folder"
+    },
+    {
+      title: "action",
+      dataIndex: "",
+      key: "action",
+      width: 80,
+      render: (text, record) => <Button type="none" icon={<FaTrashAlt color="red" onClick={event => handleClickDelete(event, record)} />} /> 
     }
   ]
 
@@ -221,6 +246,16 @@ const Rules = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+      <Modal
+        title="ルールの削除"
+        open={isDeleteModalOpen}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        onOk={handleDeleteRule}
+        okType="danger"
+        afterClose={() => setSelectedRuleId(null)}
+      >
+        <p>本当に振り分けルールを削除しますか？</p>
       </Modal>
     </>
   )

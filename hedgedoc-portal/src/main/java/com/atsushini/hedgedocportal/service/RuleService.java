@@ -62,6 +62,14 @@ public class RuleService {
         ruleRepository.save(rule);
     }
 
+    // 振り分けルールを削除する
+    public void delete(Long id) {
+        Rule rule = ruleRepository.findById(id).orElse(null);
+        if (rule == null) throw new NotFoundException("Rule not found with ID: " + id);
+
+        ruleRepository.delete(rule);
+    }
+
     private RuleDto convertToDto(Rule rule) {
         RuleDto dto = new RuleDto();
         dto.setId(rule.getId());
