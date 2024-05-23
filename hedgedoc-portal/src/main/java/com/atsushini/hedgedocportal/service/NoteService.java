@@ -115,6 +115,7 @@ public class NoteService {
         noteDtoListUnfoldered = noteDtoListUnfoldered
             .stream()
             .filter(note -> !movedNoteIdList.contains(note.getId()))
+            .sorted((note1, note2) -> note2.getUpdatetime().compareTo(note1.getUpdatetime()))
             .toList();
 
         return noteDtoListUnfoldered;
