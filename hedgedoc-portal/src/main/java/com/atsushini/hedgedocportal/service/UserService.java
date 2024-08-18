@@ -30,8 +30,10 @@ public class UserService {
         // HedgeDocからアカウント情報を取得
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", cookie);
+        System.out.println("headers: " + headers);
         ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.GET, new HttpEntity<String>(headers), String.class);
         String responseBody = response.getBody();
+        System.out.println("res: " + responseBody);
 
         // レスポンスから"id"フィールド(HedgedocのユーザーID)を取得
         String hedgedocUserId = responseBody.contains("\"id\":\"")

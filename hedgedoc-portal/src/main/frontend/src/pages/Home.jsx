@@ -28,7 +28,7 @@ export default function Home() {
     } catch (error) {
       if (error.response.status === 403) {
         console.log("wrong cookie for HedgeDoc.");
-        navigate("/cookie-setting");
+        navigate("/login");
       }
       console.error("Error fetching history: " + error);
     }
@@ -41,7 +41,7 @@ export default function Home() {
     } catch (error) {
       if (error.response.status === 403) {
         console.log("wrong cookie for HedgeDoc.");
-        navigate("/cookie-setting");
+        navigate("/login");
       }
       console.error("Error fetching folders: " + error);
     }

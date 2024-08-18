@@ -2,7 +2,7 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { ConfigProvider, theme, Layout, Menu } from 'antd';
 import Home from './pages/Home';
 import Rules from './pages/Rules';
-import CookieSetting from './pages/CookieSetting';
+import Login from './pages/Login';
 import FolderDetail from './pages/FolderDetail';
 const { darkAlgorithm } = theme;
 const { Header, Content } = Layout;
@@ -39,7 +39,7 @@ function App() {
     {
       key: 2,
       label: (
-        <a href="/cookie-setting">Cookie設定</a>
+        <a href="/login">サインイン</a>
       )
     }
   ]
@@ -63,7 +63,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/rules" element={<Rules />} />
-              <Route path="/cookie-setting" element={<CookieSetting />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/folders/:folderId" element={<FolderDetail />} />
             </Routes>
           </Content>
