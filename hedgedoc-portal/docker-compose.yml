@@ -1,0 +1,17 @@
+version: '1.0.0'
+
+services:
+  react:
+    build: ./src/main/frontend
+    container_name: hedgedoc-portal-react
+    ports:
+      - 3001:3001
+    volumes:
+      - ./src/main/frontend:/app
+  spring:
+    build: .
+    container_name: hedgedoc-portal-spring
+    ports:
+      - 8081:8081
+    volumes:
+      - .:/app

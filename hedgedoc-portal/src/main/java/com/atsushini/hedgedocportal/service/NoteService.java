@@ -21,8 +21,6 @@ import com.atsushini.hedgedocportal.entity.Folder;
 import com.atsushini.hedgedocportal.entity.FolderNote;
 import com.atsushini.hedgedocportal.entity.Note;
 import com.atsushini.hedgedocportal.entity.Rule;
-import com.atsushini.hedgedocportal.exception.HedgedocApiException;
-import com.atsushini.hedgedocportal.exception.HedgedocForbiddenException;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.repository.FolderNoteRepository;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
@@ -35,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NoteService {
     
+    private final HistoryService historyService;
     private final FolderRepository folderRepository;
     private final NoteRepository noteRepository;
     private final FolderNoteRepository folderNoteRepository;
@@ -44,31 +43,11 @@ public class NoteService {
     @Value("${hedgedoc.url}")
     private String hedgedocUrl;
 
-    public List<NoteDto> getHistory(CurrentUserDto currentUserDto) {
+    // フォルダー分けされていないNote一覧を取得
+    public List<NoteDto> getUnFolderedNotes(CurrentUserDto currentUserDto) {
 
-        HistoryDto historyDto;
-        try {
-            String apiUrl = hedgedocUrl + "/history";
-
-            // HedgeDocのCookieをセット
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Cookie", currentUserDto.getCookie());
-
-            // HedgeDocから履歴を検索
-            ResponseEntity<HistoryDto> response = restTemplate.exchange(apiUrl, HttpMethod.GET, new HttpEntity<String>(headers), HistoryDto.class);
-
-            if (!response.getStatusCode().is2xxSuccessful()) {
-                System.out.println("Failed to fetch data from external API");
-                throw new HedgedocApiException("Failed to fetch data from external API");
-            }
-
-            historyDto = response.getBody();
-        } catch (Exception e) {
-            // HedgeDocの認証が失敗すると、ステータス200でログインページが表示される。
-            // レスポンスがHistortyDtoに変換失敗すると、認証失敗と判定する。
-            System.out.println("Failed to parse data from external API. Maybe forbidden.");
-            throw new HedgedocForbiddenException("Failed to parse data from external API. Maybe forbidden.");
-        }
+        // HedgeDocの履歴を取得
+        HistoryDto historyDto = historyService.getHistory(currentUserDto);
 
         // HedgeDocの履歴情報と、DBのNoteエンティティをマージし、Dtoに変換する
         List<NoteDto> noteDtoList = historyDto.getHistory().stream().map(historyItem -> {

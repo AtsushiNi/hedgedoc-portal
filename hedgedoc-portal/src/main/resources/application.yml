@@ -10,4 +10,4 @@ spring:
               - private-key-location: classpath:credentials/local.key
                 certificate-location: classpath:credentials/local.crt
             assertingparty:
-              metadata-uri: http://localhost:8080/realms/hedgedoc/protocol/saml/descriptor
+              metadata-uri: http://host.docker.internal:8080/realms/hedgedoc/protocol/saml/descriptor

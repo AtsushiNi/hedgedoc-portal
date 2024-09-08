@@ -16,13 +16,13 @@ export default function Home() {
   const notesPageSize = 15;
 
   useEffect(() => {
-    fetchHistory();
+    fetchNotes();
     fetchFolders();
   }, []);
 
-  const fetchHistory = async () => {
+  const fetchNotes = async () => {
     try {
-      const response = await axios.get("/api/v1/history");
+      const response = await axios.get("/api/v1/notes");
       setNotes(response.data);
       setShowingNotes(response.data.slice(0, notesPageSize));
     } catch (error) {
@@ -30,7 +30,7 @@ export default function Home() {
         console.log("wrong cookie for HedgeDoc.");
         navigate("/login");
       }
-      console.error("Error fetching history: " + error);
+      console.error("Error fetching notes: " + error);
     }
   };
 
@@ -49,7 +49,7 @@ export default function Home() {
 
   // フォルダーリスト画面のデータを更新する処理
   const fetchDataForFolderList = () => {
-    fetchHistory();
+    fetchNotes();
     fetchFolders();
   }
 
@@ -75,7 +75,7 @@ export default function Home() {
         </Button>
       </Flex>
 
-      <NoteList notes={showingNotes} folder={null} folders={folders} reload={fetchHistory} root />
+      <NoteList notes={showingNotes} folder={null} folders={folders} reload={fetchNotes} root />
       <Pagination defaultCurrent={1} total={notes.length} defaultPageSize={notesPageSize} onChange={handleChangeNotesPageNumber} />
 
       <Divider style={{ background: "silver" }} />
