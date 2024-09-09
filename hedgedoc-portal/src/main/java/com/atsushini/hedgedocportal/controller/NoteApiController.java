@@ -17,6 +17,7 @@ import com.atsushini.hedgedocportal.dto.NoteDto;
 import com.atsushini.hedgedocportal.exception.HedgedocApiException;
 import com.atsushini.hedgedocportal.exception.HedgedocForbiddenException;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
+import com.atsushini.hedgedocportal.service.HistoryService;
 import com.atsushini.hedgedocportal.service.NoteService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class NoteApiController {
     
     private final NoteService noteService;
+    private final HistoryService historyService;
 
     @GetMapping
     public ResponseEntity<List<NoteDto>> getNotes(HttpServletRequest request) {
@@ -51,6 +53,25 @@ public class NoteApiController {
         } catch (HedgedocApiException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<NoteDto>> search(HttpServletRequest request) {
+        // sessionかcookieがなければ認証エラー。Cookie設定ページへ遷移させる
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("currentUser") == null) {
+            System.out.println("no session. set cookie.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        CurrentUserDto currentUserDto = (CurrentUserDto) session.getAttribute("currentUser");
+
+        // 履歴を取得
+        List<NoteDto> history = noteService.getUnFolderedNotes(currentUserDto);
+        // HedgeDocのノート内容エクスポートデータを取得
+        List<NoteDto> exportData = historyService.getExportData(currentUserDto);
+        
+
+        return ResponseEntity.ok(history);
     }
     
     @PostMapping
