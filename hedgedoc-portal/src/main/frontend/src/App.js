@@ -69,7 +69,7 @@ function App() {
               onPressEnter={handleSearch}
               placeholder="Search..."
               prefix={<SearchOutlined />}
-              style={{ width: 300, height: 50, flex: "0 1 400px", margin: "auto", marginLeft: 200 }}
+              style={{ width: 300, height: 40, flex: "0 1 400px", margin: "auto", marginLeft: 200, background: "rgba(255,255,255,0.2)" }}
             />
             <Menu
               theme="dark"

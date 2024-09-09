@@ -68,7 +68,8 @@ public class NoteApiController {
         // 履歴を取得
         List<NoteDto> history = noteService.getUnFolderedNotes(currentUserDto);
         // HedgeDocのノート内容エクスポートデータを取得
-        List<NoteDto> exportData = historyService.getExportData(currentUserDto);
+        noteService.storeNoteContents(history);
+        // List<NoteDto> exportData = historyService.getExportData(currentUserDto);
         
 
         return ResponseEntity.ok(history);
