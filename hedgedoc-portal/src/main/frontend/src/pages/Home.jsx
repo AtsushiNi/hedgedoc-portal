@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, Divider, Flex, Modal, Cascader, Pagination } from "antd";
 import axios from "axios";
+import { useCookies } from "react-cookie";
 import "../css/Home.css";
 import FolderList from "../components/FolderList";
 import NoteList from "../components/NoteList";
@@ -11,9 +12,16 @@ export default function Home() {
   const [notes, setNotes] = useState([]);
   const [showingNotes, setShowingNotes] = useState([]);
   const [folders, setFolders] = useState([]);
+  const [cookie] = useCookies();
 
   const HEDGEDOC_URL = "http://localhost:3000";
   const notesPageSize = 15;
+
+  const authAxios = axios.create({
+    headers: {
+      "x-auth-token": `Bearer ${cookie.token}`
+    }
+  })
 
   useEffect(() => {
     fetchNotes();
@@ -22,7 +30,7 @@ export default function Home() {
 
   const fetchNotes = async () => {
     try {
-      const response = await axios.get("/api/v1/notes");
+      const response = await authAxios.get("/api/v1/notes");
       setNotes(response.data);
       setShowingNotes(response.data.slice(0, notesPageSize));
     } catch (error) {
@@ -36,7 +44,7 @@ export default function Home() {
 
   const fetchFolders = async () => {
     try {
-      const { data: folders } = await axios.get("/api/v1/folders");
+      const { data: folders } = await authAxios.get("/api/v1/folders");
       setFolders(folders);
     } catch (error) {
       if (error.response.status === 403) {
