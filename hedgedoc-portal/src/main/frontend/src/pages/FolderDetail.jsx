@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Divider, Breadcrumb, Flex, Button } from 'antd';
 import { HomeFilled } from '@ant-design/icons';
 import axios from 'axios';
+import { useCookies } from "react-cookie";
 import FolderList from '../components/FolderList';
 import NoteList from '../components/NoteList';
 
@@ -11,22 +12,29 @@ export default function FolderDetail() {
   const navigate = useNavigate();
   const [folder, setFolder] = useState(null);
   const [folders, setFolders] = useState([]);
+  const [cookie] = useCookies();
 
   useEffect(() => {
     fetchFolder();
     fetchFolders();
   }, [folderId])
 
+  const authAxios = axios.create({
+    headers: {
+      "x-auth-token": `Bearer ${cookie.token}`
+    }
+  })
+
   const handleCreateNote = async() => {
     const data = { parentFolderId: folderId };
-    const response = await axios.post("/api/v1/notes", data);
+    const response = await authAxios.post("/api/v1/notes", data);
     const { data: newNoteUrl } = response;
     window.open(newNoteUrl);
   }
 
   const fetchFolder = async() => {
     try {
-      const response = await axios.get("/api/v1/folders/" + folderId);
+      const response = await authAxios.get("/api/v1/folders/" + folderId);
       setFolder(response.data);
     } catch (error) {
       if (error.response.status === 403) {
@@ -39,7 +47,7 @@ export default function FolderDetail() {
 
   const fetchFolders = async () => {
     try {
-      const { data: folders } = await axios.get("/api/v1/folders");
+      const { data: folders } = await authAxios.get("/api/v1/folders");
       setFolders(folders);
     } catch (error) {
       if (error.response.status === 403) {

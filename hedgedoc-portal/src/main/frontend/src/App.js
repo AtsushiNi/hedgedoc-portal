@@ -1,5 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import { ConfigProvider, theme, Layout, Menu } from 'antd';
+import { CookiesProvider } from "react-cookie";
 import Home from './pages/Home';
 import Rules from './pages/Rules';
 import Login from './pages/Login';
@@ -60,12 +61,14 @@ function App() {
             />
           </Header>
           <Content style={contentStyle}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/rules" element={<Rules />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/folders/:folderId" element={<FolderDetail />} />
-            </Routes>
+            <CookiesProvider>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/rules" element={<Rules />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/folders/:folderId" element={<FolderDetail />} />
+              </Routes>
+            </CookiesProvider>
           </Content>
         </Layout>
       </ConfigProvider>

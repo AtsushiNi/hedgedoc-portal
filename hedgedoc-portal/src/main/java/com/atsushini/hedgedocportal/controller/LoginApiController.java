@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +28,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.atsushini.hedgedocportal.dto.CurrentUserDto;
 import com.atsushini.hedgedocportal.service.UserService;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -36,11 +42,27 @@ import lombok.RequiredArgsConstructor;
 public class LoginApiController {
 
     private final UserService userService;
+    private final DaoAuthenticationProvider daoAuthenticationProvider;
 
     @Value("${hedgedoc.url}")
     private String hedgedocUrl;
 
     @PostMapping
+    public ResponseEntity<String> loginApi(@RequestBody PostBody requestBody) {
+        try {
+            daoAuthenticationProvider.authenticate(new UsernamePasswordAuthenticationToken(requestBody.getUserId(), requestBody.getPassword()));
+        } catch (AuthenticationException e){
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String token = JWT.create().withClaim("userId", requestBody.getUserId()).sign(Algorithm.HMAC256("__secret__"));
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("X-AUTH-TOKEN", token);
+        return new ResponseEntity<String>(httpHeaders, HttpStatus.OK);
+    }
+
+    @PostMapping("/tmp")
     public void login(@RequestBody PostBody requestBody, HttpServletRequest request) throws Exception {
 
         RestTemplate restTemplate = new RestTemplate();
@@ -103,7 +125,8 @@ public class LoginApiController {
         // ログインできたか検証
         requestHeaders.set("Cookie", hedgedocCookies);
         HttpEntity<String> hedgedocEntity = new HttpEntity<>(requestHeaders);
-        ResponseEntity<String> hedgedocResponse = restTemplate.exchange(hedgedocUrl, HttpMethod.GET, hedgedocEntity, String.class);
+        ResponseEntity<String> hedgedocResponse = restTemplate.exchange(hedgedocUrl, HttpMethod.GET, hedgedocEntity,
+                String.class);
         if (hedgedocResponse.getStatusCode() == HttpStatusCode.valueOf(302)) {
             throw new Exception("forbidden");
         }

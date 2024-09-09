@@ -3,6 +3,7 @@ import { Button, Flex, Modal, Table, Form, Input, Cascader } from "antd";
 import { FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 const Rules = () => {
   const [rules, setRules] = useState([]);
@@ -17,6 +18,13 @@ const Rules = () => {
   const navigate = useNavigate();
   const createInputRef = useRef(null);
   const updateInputRef = useRef(null);
+  const [cookie] = useCookies();
+
+  const authAxios = axios.create({
+    headers: {
+      "x-auth-token": `Bearer ${cookie.token}`
+    }
+  })
 
   useEffect(() => {
     fetchRules();
@@ -38,7 +46,7 @@ const Rules = () => {
     let toFolderId = null;
     if (toFolderIdList.length !== 0) toFolderId = toFolderIdList[toFolderIdList.length - 1];
     const data = { title: ruleTitle, regularExpression: regularExpression, folderId: toFolderId };
-    await axios.post("/api/v1/rules", data);
+    await authAxios.post("/api/v1/rules", data);
 
     fetchRules();
     setIsCreateModalOpen(false);
@@ -49,7 +57,7 @@ const Rules = () => {
     let toFolderId = null;
     if (toFolderIdList.length !== 0) toFolderId = toFolderIdList[toFolderIdList.length - 1];
     const data = { title: ruleTitle, regularExpression: regularExpression, folderId: toFolderId };
-    await axios.put("/api/v1/rules/" + selectedRuleId, data);
+    await authAxios.put("/api/v1/rules/" + selectedRuleId, data);
 
     fetchRules();
     setIsUpdateModalOpen(false);
@@ -57,7 +65,7 @@ const Rules = () => {
 
   // ルール削除実行時のハンドラ
   const handleDeleteRule = async() => {
-    await axios.delete("/api/v1/rules/" + selectedRuleId);
+    await authAxios.delete("/api/v1/rules/" + selectedRuleId);
 
     fetchRules();
     setIsDeleteModalOpen(false);
@@ -73,7 +81,7 @@ const Rules = () => {
 
   const fetchRules = async() => {
     try {
-      const response = await axios.get("/api/v1/rules");
+      const response = await authAxios.get("/api/v1/rules");
       const rules = response.data.map(rule => ({
         id: rule.id,
         title: rule.title,
@@ -93,7 +101,7 @@ const Rules = () => {
 
   const fetchFolders = async () => {
     try {
-      const { data: folders } = await axios.get("/api/v1/folders");
+      const { data: folders } = await authAxios.get("/api/v1/folders");
       setFolderTree(folders);
     } catch (error) {
       if (error.response.status === 403) {

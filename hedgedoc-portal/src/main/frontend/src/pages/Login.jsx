@@ -3,13 +3,19 @@ import { Card, Input, Button, Form, notification } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import Typography from 'antd/es/typography/Typography';
+import { useCookies } from "react-cookie";
 
-export default function Login() {
+const Login = () => {
   const navigate = useNavigate();
   const [api, contextHolder] = notification.useNotification();
+  const [cookies, setCookie] = useCookies();
+
   const handleSubmit = async (values) => {
     try {
-      await axios.post('/api/v1/login', values);
+      const response = await axios.post('/api/v1/login', values);
+      const token = response.headers["x-auth-token"];
+      setCookie("token", token);
+
       navigate("/");
     } catch (error) {
       console.error('Sign in failed.', error);
@@ -47,3 +53,5 @@ export default function Login() {
     </div>
   );
 }
+
+export default Login;
