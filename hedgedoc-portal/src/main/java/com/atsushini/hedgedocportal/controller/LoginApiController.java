@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.atsushini.hedgedocportal.dto.CurrentUserDto;
+import com.atsushini.hedgedocportal.service.ESNoteService;
 import com.atsushini.hedgedocportal.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,12 +37,15 @@ import lombok.RequiredArgsConstructor;
 public class LoginApiController {
 
     private final UserService userService;
+    private final ESNoteService noteService;
 
     @Value("${hedgedoc.url}")
     private String hedgedocUrl;
 
     @PostMapping
     public void login(@RequestBody PostBody requestBody, HttpServletRequest request) throws Exception {
+        System.out.println(noteService.searchNotesByContent("これは"));
+        System.out.println("================================-");
 
         RestTemplate restTemplate = new RestTemplate();
 
