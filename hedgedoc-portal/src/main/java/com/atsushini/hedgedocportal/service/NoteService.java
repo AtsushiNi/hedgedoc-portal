@@ -1,5 +1,6 @@
 package com.atsushini.hedgedocportal.service;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -185,6 +186,15 @@ public class NoteService {
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("failed to delete HedgeDoc history. id: " + note.getHedgedocId());
         }
+    }
+
+    public void storeNoteContents(List<NoteDto> notes) {
+        notes.forEach(note -> {
+            System.out.println(note.getTitle());
+            String url = hedgedocUrl + "/" + note.getHedgedocId() + "/download";
+            ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, null, byte[].class);
+            System.out.println(new String(response.getBody(), StandardCharsets.UTF_8));
+        });
     }
 
     // HedgeDocの履歴情報とDBのNoteエンティティをDtoに変換
