@@ -1,7 +1,5 @@
 package com.atsushini.hedgedocportal.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,12 +7,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class NoteDto {
+public class ESNoteDto {
     
-    private Long id;
-    private String hedgedocId;
+    private String id;
     private String title;
     private String content;
-    private Boolean pinned;
-    private LocalDateTime updatetime;
 }

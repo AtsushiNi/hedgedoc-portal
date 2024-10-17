@@ -23,6 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.atsushini.hedgedocportal.dto.CurrentUserDto;
+import com.atsushini.hedgedocportal.entity.ESNote;
+import com.atsushini.hedgedocportal.repository.ESNoteRepository;
+import com.atsushini.hedgedocportal.service.ESNoteService;
 import com.atsushini.hedgedocportal.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,12 +39,21 @@ import lombok.RequiredArgsConstructor;
 public class LoginApiController {
 
     private final UserService userService;
+    private final ESNoteService noteService;
+    private final ESNoteRepository noteRepository;
 
     @Value("${hedgedoc.url}")
     private String hedgedocUrl;
 
     @PostMapping
     public void login(@RequestBody PostBody requestBody, HttpServletRequest request) throws Exception {
+        ESNote note = new ESNote();
+        note.setId("aaaaaaaaaaaaaaa");
+        note.setTitle("タイトルタイトル");
+        note.setContent("こちらは適当な日本語の文章です。日々の生活の中で、さまざまな出来事が起こります。仕事や趣味、家族や友人との時間など、忙しい日々の中での小さな楽しみや新しい発見が、私たちの生活を豊かにしてくれます。また、困難に直面することもありますが、それを乗り越えることで、成長し次のステップへと進むことができます。");
+        // noteRepository.save(note);
+        System.out.println(noteService.searchNotesByContent("日々の生活"));
+        System.out.println("================================-");
 
         RestTemplate restTemplate = new RestTemplate();
 

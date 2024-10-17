@@ -1,13 +1,24 @@
-import { Routes, Route, Link } from 'react-router-dom';
-import { ConfigProvider, theme, Layout, Menu } from 'antd';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { ConfigProvider, theme, Layout, Menu, Input } from 'antd';
 import Home from './pages/Home';
 import Rules from './pages/Rules';
 import Login from './pages/Login';
 import FolderDetail from './pages/FolderDetail';
+import Search from './pages/Search';
+import { SearchOutlined } from '@ant-design/icons';
+import { useState } from 'react';
 const { darkAlgorithm } = theme;
 const { Header, Content } = Layout;
 
 function App() {
+  const [searchWord, setSearchWord] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (searchWord.trim() !== "") {
+      navigate(`/search?query=${encodeURIComponent(searchWord)}`);
+    }
+  }
 
   const headerStyle = {
     height: 64,
@@ -52,6 +63,14 @@ function App() {
             <div>
               <a href="/" style={{ textDecoration: "none", color: "silver" }}>HedgeDoc portal</a>
             </div>
+            <Input
+              value={searchWord}
+              onChange={e => setSearchWord(e.target.value)}
+              onPressEnter={handleSearch}
+              placeholder="Search..."
+              prefix={<SearchOutlined />}
+              style={{ width: 300, height: 40, flex: "0 1 400px", margin: "auto", marginLeft: 200, background: "rgba(255,255,255,0.2)" }}
+            />
             <Menu
               theme="dark"
               mode="horizontal"
@@ -65,6 +84,7 @@ function App() {
               <Route path="/rules" element={<Rules />} />
               <Route path="/login" element={<Login />} />
               <Route path="/folders/:folderId" element={<FolderDetail />} />
+              <Route path="/search" element={<Search />} />
             </Routes>
           </Content>
         </Layout>
