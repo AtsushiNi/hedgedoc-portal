@@ -12,5 +12,6 @@ import lombok.Data;
 public class ESNote {
     @Id
     String id;
+    String title;
     String content;
 }

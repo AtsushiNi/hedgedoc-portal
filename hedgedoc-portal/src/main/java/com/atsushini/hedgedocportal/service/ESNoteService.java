@@ -24,6 +24,7 @@ public class ESNoteService {
     private ESNoteDto convertToNoteDto(ESNote note) {
         ESNoteDto dto = new ESNoteDto();
         dto.setId(note.getId());
+        dto.setTitle(note.getTitle());
         dto.setContent(note.getContent());
         return dto;
     }

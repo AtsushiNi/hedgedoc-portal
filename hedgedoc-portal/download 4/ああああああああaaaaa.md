@@ -1,4 +1,0 @@
-ああああああああaaaaa
-===
-aaaaaaaaaaaaaaaaaa
-ああああああああああああああああああ

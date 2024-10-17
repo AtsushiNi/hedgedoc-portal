@@ -15,5 +15,10 @@
    - user: `user`
    - password: `pass`
 
-4. hedgedoc-portal起動
+4. ElasticSearch起動
+   1. `cd elasticsearch`
+   2. `docker-compose up`
+   3. [kibana](http://localhost:5601)にアクセス
+
+5. hedgedoc-portal起動
    - [hedgedoc-portal/README.md](./hedgedoc-portal/README.md)を参照
