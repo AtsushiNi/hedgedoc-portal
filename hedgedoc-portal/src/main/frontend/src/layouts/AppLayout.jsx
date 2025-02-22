@@ -1,5 +1,8 @@
-import { Outlet } from 'react-router-dom';
-import { ConfigProvider, Layout, Menu, theme } from "antd";
+import { useState } from "react";
+import { Outlet, useNavigate } from 'react-router-dom';
+import { Input, ConfigProvider, Layout, Menu, theme } from "antd";
+import { SearchOutlined } from '@ant-design/icons';
+
 const { Header, Content } = Layout;
 const { darkAlgorithm } = theme;
 
@@ -34,27 +37,47 @@ const menuItems = [
   },
 ];
 
-const AppLayout = () => (
-  <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
-    <Layout>
-      <Header style={headerStyle}>
-        <div>
-          <a href="/" style={{ textDecoration: "none", color: "silver" }}>
-            HedgeDoc portal
-          </a>
-        </div>
-        <Menu
-          theme="dark"
-          mode="horizontal"
-          items={menuItems}
-          style={{ flex: 1, justifyContent: "end" }}
-        />
-      </Header>
-      <Content style={contentStyle}>
-        <Outlet />
-      </Content>
-    </Layout>
-  </ConfigProvider>
-);
+const AppLayout = () => {
+  const [searchWord, setSearchWord] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (searchWord.trim() !== "") {
+      navigate(`/search?query=${encodeURIComponent(searchWord)}`);
+    }
+  }
+
+  return (
+
+    <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
+      <Layout>
+        <Header style={headerStyle}>
+          <div>
+            <a href="/" style={{ textDecoration: "none", color: "silver" }}>
+              HedgeDoc portal
+            </a>
+          </div>
+          <Input
+            value={searchWord}
+            onChange={e => setSearchWord(e.target.value)}
+            onPressEnter={handleSearch}
+            placeholder="Search..."
+            prefix={<SearchOutlined />}
+            style={{ width: 300, height: 40, flex: "0 1 400px", margin: "auto", marginLeft: 200, background: "rgba(255,255,255,0.2)" }}
+          />
+          <Menu
+            theme="dark"
+            mode="horizontal"
+            items={menuItems}
+            style={{ flex: 1, justifyContent: "end" }}
+          />
+        </Header>
+        <Content style={contentStyle}>
+          <Outlet />
+        </Content>
+      </Layout>
+    </ConfigProvider>
+  );
+}
 
 export default AppLayout;
