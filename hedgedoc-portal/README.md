@@ -21,3 +21,7 @@ mvn spring-boot:run -Pprod
 ```
 
 2. localhost:8081にアクセス
+
+### URL
+- アプリトップ: `/`
+- ダッシュボード: `/admin`
