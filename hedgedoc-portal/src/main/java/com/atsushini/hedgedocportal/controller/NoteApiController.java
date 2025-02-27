@@ -14,15 +14,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.atsushini.hedgedocportal.dto.NoteDto;
-import com.atsushini.hedgedocportal.dto.UserDto;
-import com.atsushini.hedgedocportal.exception.HedgedocApiException;
-import com.atsushini.hedgedocportal.exception.HedgedocForbiddenException;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.service.ESNoteService;
 import com.atsushini.hedgedocportal.service.NoteService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 

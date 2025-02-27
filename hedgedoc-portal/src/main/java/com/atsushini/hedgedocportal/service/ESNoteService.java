@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 public class ESNoteService {
     
     private final ESNoteRepository esNoteRepository;
-    private final UserService userService;
     private final NoteService noteService;
     private final RestTemplate restTemplate;
 

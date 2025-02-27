@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class UserDto {
     private Long id;
+    // keycloakのユーザー名
     private String userName;
-    // userNameとは別？
+    // hedgedoc内でのユーザーID
     private String hedgedocId;
     // HedgeDocのAPIに使うcookie.
     private String hedgedocCookies;
