@@ -9,13 +9,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.atsushini.hedgedocportal.dto.CurrentUserDto;
+import com.atsushini.hedgedocportal.authentication.AuthenticationUtil;
 import com.atsushini.hedgedocportal.dto.FolderDto;
 import com.atsushini.hedgedocportal.dto.NoteDto;
+import com.atsushini.hedgedocportal.dto.UserDto;
 import com.atsushini.hedgedocportal.entity.Folder;
 import com.atsushini.hedgedocportal.entity.FolderNote;
 import com.atsushini.hedgedocportal.entity.Note;
 import com.atsushini.hedgedocportal.entity.User;
+import com.atsushini.hedgedocportal.exception.ForbiddenException;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.repository.FolderNoteRepository;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
@@ -38,8 +40,9 @@ public class FolderService {
     @Value("${hedgedoc.url}")
     private String hedgedocUrl;
 
-    public List<FolderDto> getFolderTree(CurrentUserDto userDto) {
-        List<Folder> rootFolders = folderRepository.findByUserHedgedocIdAndParentFolderIsNull(userDto.getHedgedocId());
+    public List<FolderDto> getFolderTree() {
+        UserDto currentUserDto = AuthenticationUtil.getCurrentUser();
+        List<Folder> rootFolders = folderRepository.findByUserHedgedocIdAndParentFolderIsNull(currentUserDto.getHedgedocId());
 
         return rootFolders.stream()
             .map(this::convertToDtoRecursively)
@@ -94,17 +97,22 @@ public class FolderService {
     }
 
     // フォルダーを作成する
-    public void create(String title, Long parentFolderId, CurrentUserDto user) {
+    public void create(String title, Long parentFolderId) {
+        UserDto currentUserDto = AuthenticationUtil.getCurrentUser();
+
         Folder newFolder = new Folder();
 
         if (parentFolderId != null) {
             Folder parentFolder = folderRepository.findById(parentFolderId).orElse(null);
+            if (!parentFolder.getUser().getId().equals(currentUserDto.getId())) {
+                throw new ForbiddenException();
+            }
             newFolder.setParentFolder(parentFolder);
         }
 
         newFolder.setTitle(title);
 
-        User currentUser = userRepository.findById(user.getId()).orElse(null);
+        User currentUser = userRepository.findById(currentUserDto.getId()).orElse(null);
         newFolder.setUser(currentUser);
 
         folderRepository.save(newFolder);

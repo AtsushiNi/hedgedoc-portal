@@ -1,0 +1,35 @@
+curl -X PUT "http://localhost:9200/note" -H 'Content-Type: application/json' -d'
+{
+    "settings": {
+        "analysis": {
+            analyzer": {
+                "kuromoji_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "kuromoji_tokenizer"
+                }
+            }
+        }
+    },
+    "mappings": {
+        "properties": {
+            "content": {
+                "type": "text",
+                "analyzer": "kuromoji_analyzer"
+            },
+            "id": {
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword",
+                        "ignore_above": 256
+                    }
+                }
+            },
+            "_class": {
+                "type": "keyword",
+                "index": false,
+                "doc_values": false
+            }
+        }
+    }
+}'

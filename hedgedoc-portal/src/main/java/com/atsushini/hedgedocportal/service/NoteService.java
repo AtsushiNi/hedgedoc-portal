@@ -1,6 +1,5 @@
 package com.atsushini.hedgedocportal.service;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,13 +14,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.atsushini.hedgedocportal.dto.CurrentUserDto;
+import com.atsushini.hedgedocportal.authentication.AuthenticationUtil;
 import com.atsushini.hedgedocportal.dto.HistoryDto;
 import com.atsushini.hedgedocportal.dto.NoteDto;
+import com.atsushini.hedgedocportal.dto.UserDto;
 import com.atsushini.hedgedocportal.entity.Folder;
 import com.atsushini.hedgedocportal.entity.FolderNote;
 import com.atsushini.hedgedocportal.entity.Note;
 import com.atsushini.hedgedocportal.entity.Rule;
+import com.atsushini.hedgedocportal.exception.ForbiddenException;
+import com.atsushini.hedgedocportal.exception.HedgedocApiException;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.repository.FolderNoteRepository;
 import com.atsushini.hedgedocportal.repository.FolderRepository;
@@ -34,7 +36,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class NoteService {
     
-    private final HistoryService historyService;
     private final FolderRepository folderRepository;
     private final NoteRepository noteRepository;
     private final FolderNoteRepository folderNoteRepository;
@@ -44,30 +45,12 @@ public class NoteService {
     @Value("${hedgedoc.url}")
     private String hedgedocUrl;
 
-    // フォルダー分けされていないNote一覧を取得
-    public List<NoteDto> getUnFolderedNotes(CurrentUserDto currentUserDto) {
-
+    public List<NoteDto> getHomeNotes() {
         // HedgeDocの履歴を取得
-        HistoryDto historyDto = historyService.getHistory(currentUserDto);
-
-        // HedgeDocの履歴情報と、DBのNoteエンティティをマージし、Dtoに変換する
-        List<NoteDto> noteDtoList = historyDto.getHistory().stream().map(historyItem -> {
-            // 検索
-            Note note = noteRepository.findByHedgedocId(historyItem.getId());
-            // DBになければ作成する
-            if (note == null) {
-                Note newNote = new Note();
-                newNote.setHedgedocId(historyItem.getId());
-                note = noteRepository.save(newNote);
-            }
-
-            // HedgeDocの履歴情報とDBのNoteエンティティをDtoに変換
-            NoteDto dto = convertToNoteDto(note, historyItem);
-
-            return dto;
-        }).toList();
+        List<NoteDto> noteDtoList = getHistory();
 
         // 既にフォルダ分けされているノートはトップページの履歴に表示しない
+        UserDto currentUserDto = AuthenticationUtil.getCurrentUser();
         List<Note> notesInFolders = noteRepository.findByUserId(currentUserDto.getId());
         List<Long> noteIdListInFolders = notesInFolders.stream().map(Note::getId).toList();
         List<NoteDto> noteDtoListUnfoldered = noteDtoList
@@ -109,11 +92,53 @@ public class NoteService {
         return noteDtoListUnfoldered;
     }
 
+    // HedgeDocの履歴を返す
+    public List<NoteDto> getHistory() {
+
+        String apiUrl = hedgedocUrl + "/history";
+
+        // HedgeDocから履歴を検索
+        UserDto currentUserDto = AuthenticationUtil.getCurrentUser();
+        HttpEntity<String> httpEntity = new HttpEntity<>(getHedgeDocHttpHeaders(currentUserDto));
+        ResponseEntity<HistoryDto> response = restTemplate.exchange(apiUrl, HttpMethod.GET, httpEntity, HistoryDto.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            System.out.println("Failed to fetch data from external API");
+            throw new HedgedocApiException("Failed to fetch data from external API");
+        }
+
+        HistoryDto historyDto = response.getBody();
+
+        // HedgeDocの履歴情報と、DBのNoteエンティティをマージし、Dtoに変換する
+        List<NoteDto> noteDtoList = historyDto.getHistory().stream().map(historyItem -> {
+            // 検索
+            Note note = noteRepository.findByHedgedocId(historyItem.getId());
+            // DBになければ作成する
+            if (note == null) {
+                Note newNote = new Note();
+                newNote.setHedgedocId(historyItem.getId());
+                note = noteRepository.save(newNote);
+            }
+
+            // HedgeDocの履歴情報とDBのNoteエンティティをDtoに変換
+            NoteDto dto = convertToNoteDto(note, historyItem);
+
+            return dto;
+        }).toList();
+
+        return noteDtoList;
+    }
+
     public String createNote(Long parentFolderId) {
         Folder parentFolder = folderRepository.findById(parentFolderId).orElse(null);
         if (parentFolder == null) throw new NotFoundException("Folder not found with ID: " + parentFolderId);        
 
-        HttpHeaders headers = new HttpHeaders();
+        UserDto currentUserDto = AuthenticationUtil.getCurrentUser();
+        if (!parentFolder.getUser().getId().equals(currentUserDto.getId())) {
+            throw new ForbiddenException();
+        }
+
+        HttpHeaders headers = getHedgeDocHttpHeaders(currentUserDto);
         headers.setContentType(MediaType.TEXT_MARKDOWN);
 
         // HedgeDocの新規ノートを作成し、URLを取得する
@@ -143,6 +168,8 @@ public class NoteService {
         Note note;
         FolderNote fromFolderNote = null;
 
+        UserDto currentUserDto = AuthenticationUtil.getCurrentUser();
+
         if (fromFolderId == null) { // noteがフォルダ分けされていなかった場合
             Optional<Note> optionalNote = noteRepository.findById(noteId); 
             note = optionalNote.orElseThrow(() -> new NotFoundException("Note not found with ID: " + noteId));
@@ -151,11 +178,18 @@ public class NoteService {
             if (fromFolderNote == null) {
                 throw new NotFoundException("Note not found with ID: " + noteId + " in folder with ID: " + fromFolderId);
             }
+            // これnotじゃなくて大丈夫？ gitlabのコードも確認
+            if (fromFolderNote.getFolder().getUser().getId().equals(currentUserDto.getId())) {
+                throw new ForbiddenException();
+            }
             note = fromFolderNote.getNote();
         }
 
         Optional<Folder> optionalToFolder = folderRepository.findById(toFolderId);
         Folder toFolder = optionalToFolder.orElseThrow(() -> new NotFoundException("Folder not found with ID: " + toFolderId));
+        if (!toFolder.getUser().getId().equals(currentUserDto.getId())) {
+            throw new ForbiddenException();
+        }
 
         FolderNote toFolderNote = new FolderNote();
         toFolderNote.setFolder(toFolder);
@@ -167,9 +201,10 @@ public class NoteService {
         folderNoteRepository.save(toFolderNote);
     }
 
-    public void deleteNote(Long noteId, Long userId, String cookie) {
+    public void deleteNote(Long noteId) {
         // 対象ユーザーの全フォルダから対象ノートを削除
-        List<FolderNote> folderNotes = folderNoteRepository.findByNoteIdAndUserId(noteId, userId);
+        UserDto currentUserDto = AuthenticationUtil.getCurrentUser();
+        List<FolderNote> folderNotes = folderNoteRepository.findByNoteIdAndUserId(noteId, currentUserDto.getId());
         folderNoteRepository.deleteAll(folderNotes);
 
         Note note = noteRepository.findById(noteId).orElse(null);
@@ -179,22 +214,12 @@ public class NoteService {
         String apiUrl = hedgedocUrl + "/history/" + note.getHedgedocId();
 
         // HedgeDocの閲覧履歴からノートを削除
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Cookie", cookie);
+        HttpHeaders headers = getHedgeDocHttpHeaders(currentUserDto);
         ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.DELETE, new HttpEntity<String>(headers), String.class);
 
         if (!response.getStatusCode().is2xxSuccessful()) {
             throw new RuntimeException("failed to delete HedgeDoc history. id: " + note.getHedgedocId());
         }
-    }
-
-    public void storeNoteContents(List<NoteDto> notes) {
-        notes.forEach(note -> {
-            System.out.println(note.getTitle());
-            String url = hedgedocUrl + "/" + note.getHedgedocId() + "/download";
-            ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, null, byte[].class);
-            System.out.println(new String(response.getBody(), StandardCharsets.UTF_8));
-        });
     }
 
     // HedgeDocの履歴情報とDBのNoteエンティティをDtoに変換
@@ -208,5 +233,12 @@ public class NoteService {
         noteDto.setPinned(historyItem.isPinned());
 
         return noteDto; 
+    }
+
+    private HttpHeaders getHedgeDocHttpHeaders(UserDto currentUserDto) {
+        // HedgeDocのCookieをセット
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", String.join("; ", currentUserDto.getHedgedocCookies()));
+        return headers;
     }
 }

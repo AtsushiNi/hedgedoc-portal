@@ -13,13 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atsushini.hedgedocportal.dto.CurrentUserDto;
 import com.atsushini.hedgedocportal.dto.FolderDto;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.service.FolderService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -32,36 +30,18 @@ public class FolderApiController {
 
     @GetMapping
     public ResponseEntity<List<FolderDto>> getFolders(HttpServletRequest request) {
-
-        // セッションがなければ403を返し、Cookie設定画面に遷移させる
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            System.out.println("no session. set cookie.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-
-        CurrentUserDto userDto = (CurrentUserDto) session.getAttribute(("currentUser"));
-
-        List<FolderDto> folderTree = folderService.getFolderTree(userDto);
+        List<FolderDto> folderTree = folderService.getFolderTree();
         return ResponseEntity.ok().body(folderTree);
     }
     
     @GetMapping("/{id}")
-    public FolderDto getFolderById(@PathVariable Long id) {
-        return folderService.getById(id);
+    public ResponseEntity<FolderDto> getFolderById(@PathVariable Long id) {
+        return ResponseEntity.ok().body(folderService.getById(id));
     }
 
     @PostMapping
     public ResponseEntity<String> createFolder(HttpServletRequest request, @RequestBody CreateRequest requestBody) {
-        // sessionがなければ認証エラー。Cookie設定ページへ遷移させる
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            System.out.println("no session. set cookie.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-        CurrentUserDto currentUser = (CurrentUserDto) session.getAttribute("currentUser");
-
-        folderService.create(requestBody.getTitle(), requestBody.getParentFolderId(), currentUser);
+        folderService.create(requestBody.getTitle(), requestBody.getParentFolderId());
 
         return ResponseEntity.ok("created folder successfully");
     }
@@ -106,20 +86,6 @@ public class FolderApiController {
     // フォルダーからノートを削除する
     @DeleteMapping("/{id}/notes/{noteId}")
     public ResponseEntity<String> deleteNoteFromFolder(HttpServletRequest request, @PathVariable Long id, @PathVariable Long noteId) {
-        // sessionがなければ認証エラー。Cookie設定ページへ遷移させる
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            System.out.println("no session. set cookie.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-        CurrentUserDto currentUser = (CurrentUserDto) session.getAttribute("currentUser");
-
-        // 対象フォルダーの所有者がログインユーザーであることを確認
-        Long folderOwnerId = folderService.getOwnerId(id);
-        if (!folderOwnerId.equals(currentUser.getId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-
         try {
             folderService.deleteNoteFromFolder(id, noteId);
             return ResponseEntity.ok("deleted note from folder successfully");

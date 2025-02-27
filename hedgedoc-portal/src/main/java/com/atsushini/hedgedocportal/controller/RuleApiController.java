@@ -13,13 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.atsushini.hedgedocportal.dto.CurrentUserDto;
 import com.atsushini.hedgedocportal.dto.RuleDto;
 import com.atsushini.hedgedocportal.exception.NotFoundException;
 import com.atsushini.hedgedocportal.service.RuleService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -32,41 +30,21 @@ public class RuleApiController {
 
     @GetMapping
     public ResponseEntity<List<RuleDto>> getRules(HttpServletRequest request) {
-        // セッションがなければ403を返し、Cookie設定画面に遷移させる
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            System.out.println("no session. set cookie.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-        CurrentUserDto userDto = (CurrentUserDto) session.getAttribute(("currentUser"));
 
-        List<RuleDto> ruleDtoList = ruleService.getRules(userDto);
+        List<RuleDto> ruleDtoList = ruleService.getRules();
         return ResponseEntity.ok().body(ruleDtoList);
     }
 
     @PostMapping
     public ResponseEntity<String> createRule(HttpServletRequest request, @RequestBody CreateRequest requestBody) {
-        // sessionがなければ認証エラー。Cookie設定ページへ遷移させる
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            System.out.println("no session. set cookie.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-        CurrentUserDto currentUser = (CurrentUserDto) session.getAttribute("currentUser");
 
-        ruleService.create(requestBody.getTitle(), requestBody.getRegularExpression(), requestBody.getFolderId(), currentUser);
+        ruleService.create(requestBody.getTitle(), requestBody.getRegularExpression(), requestBody.getFolderId());
 
         return ResponseEntity.ok("created rule successfully");
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateRule(HttpServletRequest request, @PathVariable Long id, @RequestBody UpdateRequest requestBody) {
-        // sessionがなければ認証エラー。Cookie設定ページへ遷移させる
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            System.out.println("no session. set cookie.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
 
         try {
             ruleService.update(id, requestBody.getTitle(), requestBody.getRegularExpression(), requestBody.getFolderId());
@@ -80,12 +58,6 @@ public class RuleApiController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteRule(HttpServletRequest request, @PathVariable Long id) {
-        // sessionがなければ認証エラー。Cookie設定ページへ遷移させる
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute("currentUser") == null) {
-            System.out.println("no session. set cookie.");
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
 
         try {
             ruleService.delete(id);

@@ -8,5 +8,4 @@ import com.atsushini.hedgedocportal.entity.Folder;
 
 public interface FolderRepository extends JpaRepository<Folder, Long> {
     List<Folder> findByUserHedgedocIdAndParentFolderIsNull(String userId);
-    
 }

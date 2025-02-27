@@ -3,13 +3,19 @@ import { Card, Input, Button, Form, notification } from 'antd';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import Typography from 'antd/es/typography/Typography';
+import { useCookies } from "react-cookie";
 
 export default function Login() {
   const navigate = useNavigate();
   const [api, contextHolder] = notification.useNotification();
+  const [ _cookies, setCookie ] = useCookies();
+
   const handleSubmit = async (values) => {
     try {
-      await axios.post('/api/v1/login', values);
+      const response = await axios.post('/api/v1/login', values);
+      const token = response.headers["x-auth-token"];
+      setCookie("accessToken", token);
+
       navigate("/");
     } catch (error) {
       console.error('Sign in failed.', error);
@@ -31,7 +37,7 @@ export default function Login() {
         </Typography>
 
         <Form layout="vertical" onFinish={handleSubmit}>
-          <Form.Item name="userId" label="user ID">
+          <Form.Item name="userName" label="user ID">
             <Input prefix={<UserOutlined/>} />
           </Form.Item>
           <Form.Item name="password" label="password">
