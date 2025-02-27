@@ -3,6 +3,7 @@ import { Button, Flex, Modal, Table, Form, Input, Cascader } from "antd";
 import { FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
 
 const Rules = () => {
   const [rules, setRules] = useState([]);
@@ -17,6 +18,7 @@ const Rules = () => {
   const navigate = useNavigate();
   const createInputRef = useRef(null);
   const updateInputRef = useRef(null);
+  const [ cookies ] = useCookies();
 
   useEffect(() => {
     fetchRules();
@@ -38,7 +40,7 @@ const Rules = () => {
     let toFolderId = null;
     if (toFolderIdList.length !== 0) toFolderId = toFolderIdList[toFolderIdList.length - 1];
     const data = { title: ruleTitle, regularExpression: regularExpression, folderId: toFolderId };
-    await axios.post("/api/v1/rules", data);
+    await axios.post("/api/v1/rules", data, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}` }});
 
     fetchRules();
     setIsCreateModalOpen(false);
@@ -49,7 +51,7 @@ const Rules = () => {
     let toFolderId = null;
     if (toFolderIdList.length !== 0) toFolderId = toFolderIdList[toFolderIdList.length - 1];
     const data = { title: ruleTitle, regularExpression: regularExpression, folderId: toFolderId };
-    await axios.put("/api/v1/rules/" + selectedRuleId, data);
+    await axios.put("/api/v1/rules/" + selectedRuleId, data, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}` }});
 
     fetchRules();
     setIsUpdateModalOpen(false);
@@ -57,7 +59,7 @@ const Rules = () => {
 
   // ルール削除実行時のハンドラ
   const handleDeleteRule = async() => {
-    await axios.delete("/api/v1/rules/" + selectedRuleId);
+    await axios.delete("/api/v1/rules/" + selectedRuleId, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}` }});
 
     fetchRules();
     setIsDeleteModalOpen(false);
@@ -73,7 +75,7 @@ const Rules = () => {
 
   const fetchRules = async() => {
     try {
-      const response = await axios.get("/api/v1/rules");
+      const response = await axios.get("/api/v1/rules", { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}` }});
       const rules = response.data.map(rule => ({
         id: rule.id,
         title: rule.title,
@@ -93,7 +95,7 @@ const Rules = () => {
 
   const fetchFolders = async () => {
     try {
-      const { data: folders } = await axios.get("/api/v1/folders");
+      const { data: folders } = await axios.get("/api/v1/folders", { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}` }});
       setFolderTree(folders);
     } catch (error) {
       if (error.response.status === 403) {

@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 public class ESNoteDto {
     
     private String id;
-    private String title;
     private String content;
 }

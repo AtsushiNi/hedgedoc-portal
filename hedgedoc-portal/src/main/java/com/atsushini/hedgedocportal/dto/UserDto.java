@@ -7,9 +7,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class CurrentUserDto {
+public class UserDto {
     private Long id;
+    private String userName;
+    // userNameとは別？
     private String hedgedocId;
     // HedgeDocのAPIに使うcookie.
-    private String cookie;
+    private String hedgedocCookies;
 }

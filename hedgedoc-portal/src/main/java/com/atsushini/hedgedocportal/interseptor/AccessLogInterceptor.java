@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.atsushini.hedgedocportal.dto.CurrentUserDto;
+import com.atsushini.hedgedocportal.dto.UserDto;
 import com.atsushini.hedgedocportal.entity.AccessLog;
 import com.atsushini.hedgedocportal.repository.AccessLogRepository;
 
@@ -48,7 +48,7 @@ public class AccessLogInterceptor implements HandlerInterceptor {
             return null;
         }
 
-        CurrentUserDto currentUser = (CurrentUserDto) session.getAttribute(("currentUser")); 
+        UserDto currentUser = (UserDto) session.getAttribute(("currentUser")); 
 
         return currentUser.getId();
     }

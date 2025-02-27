@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { Flex, Card, Button, Modal, Form, Input, Dropdown, Space, Cascader } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
+import { useCookies } from "react-cookie";
 
 const FolderList = props => {
   const { folder: currentFolder, folders, folderTree, fetchData } = props
@@ -18,6 +19,7 @@ const FolderList = props => {
   const navigate = useNavigate();
   const createInputRef = useRef(null);
   const changeNameInputRef = useRef(null);
+  const [ cookies ] = useCookies();
 
   useEffect(() => {
     // モーダルが開いた時inputにフォーカスする
@@ -36,7 +38,7 @@ const FolderList = props => {
   // フォルダ作成を実行したときのハンドラ
   const handleCreateFolder = async() => {
     const data = { title: createFolderName, parentFolderId: currentFolder?.id };
-    await axios.post("/api/v1/folders", data);
+    await axios.post("/api/v1/folders", data, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}`}});
 
     setIsCreateModalOpen(false);
 
@@ -59,7 +61,7 @@ const FolderList = props => {
   const handleMoveItem = async() => {
     const data = { toFolderId: moveToFolderId };
 
-    await axios.post("/api/v1/folders/" + moveFolder.id + "/move", data);
+    await axios.post("/api/v1/folders/" + moveFolder.id + "/move", data, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}`}});
 
     // 表示しているデータを更新
     await fetchData();
@@ -70,7 +72,7 @@ const FolderList = props => {
   // ファイル名変更を実行したときのハンドラ
   const handleChangeFolderName = async() => {
     const data = { title: changeFolderName };
-    await axios.put("/api/v1/folders/" + changeNameFolderId, data);
+    await axios.put("/api/v1/folders/" + changeNameFolderId, data, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}`}});
 
     setIsChangeFolderNameModalOpen(false);
 
@@ -86,7 +88,7 @@ const FolderList = props => {
 
   // フォルダ削除を実行したときのハンドラ
   const handleDelete = async() => {
-    await axios.delete("/api/v1/folders/" + folderToDelete.id);
+    await axios.delete("/api/v1/folders/" + folderToDelete.id, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}`}});
 
     setIsDeleteModalOpen(false);
 

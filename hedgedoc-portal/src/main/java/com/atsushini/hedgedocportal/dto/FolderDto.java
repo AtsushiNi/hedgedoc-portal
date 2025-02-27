@@ -13,7 +13,7 @@ public class FolderDto {
     
     private Long id;
     private String title;
-    private String userId;
+    private UserDto user;
     // パンクズリストを表示するため
     private List<FolderDto> parentFolders;
     private List<FolderDto> subFolders;
@@ -23,7 +23,7 @@ public class FolderDto {
         return new FolderDto(
             this.getId(),
             this.getTitle(),
-            this.getUserId(),
+            this.getUser(),
             this.getParentFolders(),
             this.getSubFolders(),
             this.getNotes()

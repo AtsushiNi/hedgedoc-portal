@@ -10,6 +10,6 @@ import com.atsushini.hedgedocportal.entity.ESNote;
 
 @Repository
 public interface ESNoteRepository extends ElasticsearchRepository<ESNote, String> {
-    @Query("{\"match\": {\"content\": {\"query\": \"?0\"}}}")
+    @Query("{\"match_phrase\": {\"content\": {\"query\": \"?0\", \"slop\": 10}}}")
     List<ESNote> searchByContent(String content);
 }

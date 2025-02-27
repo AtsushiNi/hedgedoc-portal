@@ -3,6 +3,7 @@ import { Flex, Card, Dropdown, Space, Modal, Cascader } from 'antd';
 import { PushpinTwoTone } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import axios from "axios";
+import { useCookies } from "react-cookie";
 
 const NoteList = props => {
   const { notes, folder, folders, reload, root: isRoot } = props
@@ -11,6 +12,7 @@ const NoteList = props => {
   const [moveToFolderId, setMovetoFolderId] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [deleteNoteId, setDeleteNoteId] = useState(null);
+  const [cookies ] = useCookies();
 
   const HEDGEDOC_URL = "http://localhost:3000";
 
@@ -31,7 +33,7 @@ const NoteList = props => {
 
     const data = { fromFolderId: folder?.id, toFolderId: moveToFolderId };
 
-    await axios.post("/api/v1/notes/" + moveItemId +"/move", data);
+    await axios.post("/api/v1/notes/" + moveItemId +"/move", data, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}`}});
 
     await reload();
 
@@ -40,14 +42,14 @@ const NoteList = props => {
 
   // フォルダからノートを削除したときのハンドラ
   const handleDeleteNoteFromFolder = async(id) => {
-    await axios.delete("/api/v1/folders/" + folder.id + "/notes/" + id);
+    await axios.delete("/api/v1/folders/" + folder.id + "/notes/" + id, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}`}});
 
     await reload();
   }
 
   // 閲覧履歴からノートを削除したときのハンドラ
   const handleDeleteNoteFromHistory = async() => {
-    await axios.delete("/api/v1/notes/" + deleteNoteId);
+    await axios.delete("/api/v1/notes/" + deleteNoteId, { headers: { 'x-auth-token': `Bearer ${cookies.accessToken}`}});
 
     await reload();
     setIsDeleteModalOpen(false);
