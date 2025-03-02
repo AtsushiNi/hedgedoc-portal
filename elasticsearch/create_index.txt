@@ -2,6 +2,11 @@ curl -X PUT "http://localhost:9200/note" -H 'Content-Type: application/json' -d'
 {
     "settings": {
         "analysis": {
+            "tokenizer": {
+                "kuromoji_tokenizer": {
+                    "type": "kuromoji_tokenizer"
+                }
+            },
             analyzer": {
                 "kuromoji_analyzer": {
                     "type": "custom",

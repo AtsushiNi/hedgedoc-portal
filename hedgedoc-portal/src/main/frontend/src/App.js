@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import FolderDetail from './pages/FolderDetail';
 import Dashboard from './pages/admin/Dashboard';
 import Search from './pages/Search';
+import AiChat from './pages/AiChat';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/folders/:folderId" element={<FolderDetail />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/ai-search" element={<AiChat />} />
         </Route>
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<Dashboard />} />
